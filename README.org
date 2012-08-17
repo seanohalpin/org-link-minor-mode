@@ -1,0 +1,51 @@
+#+TITLE: org-link-minor-mode
+#+AUTHOR: Sean O'Halpin
+#+DATE: 2012-08-18
+#+OPTIONS: toc:nil num:nil
+
+* About =org-link-minor-mode=
+
+=org-link-minor-mode= is an Emacs minor mode that enables org-mode style
+fontification and activation of bracket links in modes other than
+org-mode.
+
+Org-mode bracket links look like this:
+
+#+begin_example
+   [[http://www.bbc.co.uk][BBC]]
+   [[org-link-minor-mode]]
+#+end_example
+
+With this mode enabled, the links will be made active so you can click
+on them and displayed so you can see only the description if present.
+
+Note that =org-toggle-link-display= will also work when this mode is
+enabled.
+
+* Install
+
+To use this minor mode, put the file =org-link-minor-mode.el= somewhere
+on your load path and use
+
+: M-x load-library org-link-minor-mode
+
+or put the following:
+
+#+begin_src emacs-lisp
+  (require 'org-link-minor-mode)
+#+end_src
+
+in your =.emacs= file.
+
+* Rebuild
+
+The elisp file =org-link-minor-mode.el= is generated from the
+corresponding org-mode file =org-link-minor-mode.org= using org-mode's
+tangle feature.
+
+To recreate the elisp source file, open =org-link-minor-mode.org= and
+issue the command:
+
+: M-x org-babel-tangle
+
+Sean O'Halpin, 2012-08-18
