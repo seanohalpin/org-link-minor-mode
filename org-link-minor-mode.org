@@ -57,28 +57,27 @@ the [[elisp:Defining-Minor-Modes][=define-minor-mode=]] macro:
     )
 #+end_src
 
-To save the current buffer's state and the current match state, we
-wrap the body of the function in =save-excursion= and =save-match-data=:
-
-#+name: body
-#+begin_src emacs-lisp :noweb tangle
-  (save-excursion
-    (save-match-data
-      «inner-body»
-      )
-    )
-#+end_src
+The =:lighter= keyword parameter defines what appears in the mode line.
 
 * The body
 :PROPERTIES:
 :ID:       4e5b0abe-bc41-43f6-9271-b6365a7b5bce
 :END:
 
-#+name: inner-body
+We start the body by setting up the font lock keywords, using
+org-mode's =org-activate-bracket-links= to do the heavy lifting. We then
+branch depending on whether we're entering or exiting the mode:
+
+#+name: body
 #+begin_src emacs-lisp :noweb tangle
   (let ((org-link-minor-mode-keywords
-         (list '(org-activate-bracket-links (0 'org-link t)))))
-    (goto-char (point-min))
+         (list
+          '(org-activate-plain-links)
+          '(org-activate-bracket-links (0 'org-link t))
+          ))
+        (org-link-minor-mode-link-regexp
+         (concat "\(" org-plain-link-re "\)\|\(" org-bracket-link-regexp "\)" ))
+        )
     (if org-link-minor-mode
         «enter-minor-mode»
       «exit-minor-mode»
@@ -91,9 +90,9 @@ wrap the body of the function in =save-excursion= and =save-match-data=:
 :ID:       a1b76a00-4444-4b5c-bbfa-54c88dac769f
 :END:
 
-We first test if we're already in org-mode and if so display an
-informational message and switch =org-link-minor-mode= off. We need to
-do it this way as by this point we've already entered the mode.
+If we're already in org-mode, display a message and
+switch =org-link-minor-mode= off. We need to do it this way as by this
+point we've already entered the mode.
 
 #+name: enter-minor-mode
 #+begin_src emacs-lisp :noweb tangle
@@ -112,14 +111,15 @@ do it this way as by this point we've already entered the mode.
 :ID:       8d3990a4-ee3b-4276-9a6b-53665c095133
 :END:
 
-Add the font-lock specification
+Add the font-lock specification:
+
 #+begin_src emacs-lisp
   (font-lock-add-keywords nil org-link-minor-mode-keywords t)
 #+end_src
 
-Enable =org-toggle-link-display= for this buffer only (by
-making =org-descriptive-links= buffer local). This is the variable used
-by =org-toggle-link-display=.
+Enable =org-toggle-link-display= for this buffer only by
+making =org-descriptive-links= buffer local:
+
 #+begin_src emacs-lisp
   (org-set-local 'org-descriptive-links 'org-descriptive-links)
   (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
@@ -127,12 +127,14 @@ by =org-toggle-link-display=.
 
 This is the magic that makes the link body appear if you backspace
 into it (or use replace to make it no longer a link):
+
 #+begin_src emacs-lisp
   (org-set-local 'font-lock-unfontify-region-function
                  'org-unfontify-region)
 #+end_src
 
 Finally, we refontify the buffer using org's own method:
+
 #+begin_src emacs-lisp
   (org-restart-font-lock)
 #+end_src
@@ -142,15 +144,21 @@ Finally, we refontify the buffer using org's own method:
 :ID:       95c5162b-ec40-4bb7-849c-f10d12185b29
 :END:
 
-Again, we don't run this code if we're already in org-mode.
+Again, we don't run this code if we're already in org-mode:
+
 #+name: exit-minor-mode
 #+begin_src emacs-lisp :noweb tangle
   (unless (derived-mode-p 'org-mode)
-    (progn
-      «exit-minor-mode-body»
+    (save-excursion
+      (save-match-data
+        «exit-minor-mode-body»
+        )
       )
     )
 #+end_src
+
+To save the current buffer's state, we wrap the body of the function
+in =save-excursion= and =save-match-data=.
 
 * Exit minor mode body
 :PROPERTIES:
@@ -158,18 +166,25 @@ Again, we don't run this code if we're already in org-mode.
 :ID:       a555c274-844a-4913-91e0-6be72a1911e1
 :END:
 
-Remove all org-link properties (without setting buffer-modified-p):
+Remove all org-link properties (without setting =buffer-modified-p=)
+using org-mode's =org-unfontify-region=:
+
 #+begin_src emacs-lisp
   (font-lock-remove-keywords nil org-link-minor-mode-keywords)
   (org-remove-from-invisibility-spec '(org-link))
-  (while (re-search-forward org-bracket-link-regexp nil t)
+  (goto-char (point-min))
+  (while (re-search-forward org-link-minor-mode-link-regexp nil t)
     (with-silent-modifications
       (org-unfontify-region (match-beginning 0) (match-end 0))
       )
     )
 #+end_src
 
+Note: if we wanted to have more link types, we'd have to use the union
+of the various regexps here.
+
 Restore existing font lock highlighting
+
 #+begin_src emacs-lisp
   (org-restart-font-lock)
 #+end_src
@@ -179,12 +194,16 @@ Restore existing font lock highlighting
 :ID:       317688ba-da16-4a42-9e4f-20b06a8d86cf
 :END:
 
+Finally, we add the =provide= feature clause.
+
 #+name: provide
 #+begin_src emacs-lisp
 (provide 'org-link-minor-mode)
 #+end_src
 
 * Complete source
+
+Here is the complete source:
 
 #+name: source
 #+begin_src emacs-lisp :tangle org-link-minor-mode.el :noweb yes :padline no

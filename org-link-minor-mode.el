@@ -18,35 +18,39 @@
   "Toggle display of org-mode style bracket links in non-org-mode buffers."
   :lighter " org-link"
 
-  (save-excursion
-    (save-match-data
-      (let ((org-link-minor-mode-keywords
-             (list '(org-activate-bracket-links (0 'org-link t)))))
-        (goto-char (point-min))
-        (if org-link-minor-mode
-            (if (derived-mode-p 'org-mode)
-                (progn
-                  (message "org-mode doesn't need org-link-minor-mode")
-                  (org-link-minor-mode -1)
-                  )
-              (font-lock-add-keywords nil org-link-minor-mode-keywords t)
-              (org-set-local 'org-descriptive-links 'org-descriptive-links)
-              (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
-              (org-set-local 'font-lock-unfontify-region-function
-                             'org-unfontify-region)
-              (org-restart-font-lock)
-              )
-          (unless (derived-mode-p 'org-mode)
+  (let ((org-link-minor-mode-keywords
+         (list
+          '(org-activate-plain-links)
+          '(org-activate-bracket-links (0 'org-link t))
+          ))
+        (org-link-minor-mode-link-regexp
+         (concat "\(" org-plain-link-re "\)\|\(" org-bracket-link-regexp "\)" ))
+        )
+    (if org-link-minor-mode
+        (if (derived-mode-p 'org-mode)
             (progn
-              (font-lock-remove-keywords nil org-link-minor-mode-keywords)
-              (org-remove-from-invisibility-spec '(org-link))
-              (while (re-search-forward org-bracket-link-regexp nil t)
-                (with-silent-modifications
-                  (org-unfontify-region (match-beginning 0) (match-end 0))
-                  )
-                )
-              (org-restart-font-lock)
+              (message "org-mode doesn't need org-link-minor-mode")
+              (org-link-minor-mode -1)
               )
+          (font-lock-add-keywords nil org-link-minor-mode-keywords t)
+          (org-set-local 'org-descriptive-links 'org-descriptive-links)
+          (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
+          (org-set-local 'font-lock-unfontify-region-function
+                         'org-unfontify-region)
+          (org-restart-font-lock)
+          )
+      (unless (derived-mode-p 'org-mode)
+        (save-excursion
+          (save-match-data
+            (font-lock-remove-keywords nil org-link-minor-mode-keywords)
+            (org-remove-from-invisibility-spec '(org-link))
+            (goto-char (point-min))
+            (while (re-search-forward org-link-minor-mode-link-regexp nil t)
+              (with-silent-modifications
+                (org-unfontify-region (match-beginning 0) (match-end 0))
+                )
+              )
+            (org-restart-font-lock)
             )
           )
         )
