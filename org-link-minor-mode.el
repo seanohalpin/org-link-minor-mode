@@ -6,6 +6,7 @@
 ;; Enables org-mode links of the form:
 ;;
 ;;   http://www.bbc.co.uk
+;;   man:emacs
 ;;   <http://www.bbc.co.uk>
 ;;   [[http://www.bbc.co.uk][BBC]]
 ;;   [[org-link-minor-mode]]
