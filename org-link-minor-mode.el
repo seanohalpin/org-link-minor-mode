@@ -1,12 +1,16 @@
-;;; org-link-minor-mode.el -- Enable org-mode bracket links in non-org modes
+;;; org-link-minor-mode.el -- Enable org-mode links in non-org modes
 ;;
 ;; Copyright (C) 2012
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
 ;;
-;; Enables org-mode bracket links of the form:
+;; Enables org-mode links of the form:
 ;;
+;;   http://www.bbc.co.uk
+;;   <http://www.bbc.co.uk>
 ;;   [[http://www.bbc.co.uk][BBC]]
 ;;   [[org-link-minor-mode]]
+;;   [2012-08-18]
+;;   <2012-08-18>
 ;;
 ;; Note that =org-toggle-link-display= will also work when this mode
 ;; is enabled.
@@ -20,11 +24,11 @@
 
   (let ((org-link-minor-mode-keywords
          (list
+          '(org-activate-angle-links (0 'org-link t))
           '(org-activate-plain-links)
           '(org-activate-bracket-links (0 'org-link t))
+          '(org-activate-dates (0 'org-date t))
           ))
-        (org-link-minor-mode-link-regexp
-         (concat "\(" org-plain-link-re "\)\|\(" org-bracket-link-regexp "\)" ))
         )
     (if org-link-minor-mode
         (if (derived-mode-p 'org-mode)
@@ -33,26 +37,15 @@
               (org-link-minor-mode -1)
               )
           (font-lock-add-keywords nil org-link-minor-mode-keywords t)
-          (org-set-local 'org-descriptive-links 'org-descriptive-links)
+          (org-set-local 'org-descriptive-links org-descriptive-links)
           (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
           (org-set-local 'font-lock-unfontify-region-function
                          'org-unfontify-region)
           (org-restart-font-lock)
           )
       (unless (derived-mode-p 'org-mode)
-        (save-excursion
-          (save-match-data
-            (font-lock-remove-keywords nil org-link-minor-mode-keywords)
-            (org-remove-from-invisibility-spec '(org-link))
-            (goto-char (point-min))
-            (while (re-search-forward org-link-minor-mode-link-regexp nil t)
-              (with-silent-modifications
-                (org-unfontify-region (match-beginning 0) (match-end 0))
-                )
-              )
-            (org-restart-font-lock)
-            )
-          )
+        (font-lock-remove-keywords nil org-link-minor-mode-keywords)
+        (org-restart-font-lock)
         )
       )
     )

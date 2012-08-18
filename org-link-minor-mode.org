@@ -11,15 +11,19 @@
 
 #+name: header-comments
 #+begin_src emacs-lisp
-;;; org-link-minor-mode.el -- Enable org-mode bracket links in non-org modes
+;;; org-link-minor-mode.el -- Enable org-mode links in non-org modes
 ;;
 ;; Copyright (C) 2012
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
 ;;
-;; Enables org-mode bracket links of the form:
+;; Enables org-mode links of the form:
 ;;
+;;   http://www.bbc.co.uk
+;;   <http://www.bbc.co.uk>
 ;;   [[http://www.bbc.co.uk][BBC]]
 ;;   [[org-link-minor-mode]]
+;;   [2012-08-18]
+;;   <2012-08-18>
 ;;
 ;; Note that =org-toggle-link-display= will also work when this mode
 ;; is enabled.
@@ -72,11 +76,11 @@ branch depending on whether we're entering or exiting the mode:
 #+begin_src emacs-lisp :noweb tangle
   (let ((org-link-minor-mode-keywords
          (list
+          '(org-activate-angle-links (0 'org-link t))
           '(org-activate-plain-links)
           '(org-activate-bracket-links (0 'org-link t))
+          '(org-activate-dates (0 'org-date t))
           ))
-        (org-link-minor-mode-link-regexp
-         (concat "\(" org-plain-link-re "\)\|\(" org-bracket-link-regexp "\)" ))
         )
     (if org-link-minor-mode
         «enter-minor-mode»
@@ -121,7 +125,7 @@ Enable =org-toggle-link-display= for this buffer only by
 making =org-descriptive-links= buffer local:
 
 #+begin_src emacs-lisp
-  (org-set-local 'org-descriptive-links 'org-descriptive-links)
+  (org-set-local 'org-descriptive-links org-descriptive-links)
   (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
 #+end_src
 
@@ -149,16 +153,9 @@ Again, we don't run this code if we're already in org-mode:
 #+name: exit-minor-mode
 #+begin_src emacs-lisp :noweb tangle
   (unless (derived-mode-p 'org-mode)
-    (save-excursion
-      (save-match-data
-        «exit-minor-mode-body»
-        )
-      )
+    «exit-minor-mode-body»
     )
 #+end_src
-
-To save the current buffer's state, we wrap the body of the function
-in =save-excursion= and =save-match-data=.
 
 * Exit minor mode body
 :PROPERTIES:
@@ -166,22 +163,11 @@ in =save-excursion= and =save-match-data=.
 :ID:       a555c274-844a-4913-91e0-6be72a1911e1
 :END:
 
-Remove all org-link properties (without setting =buffer-modified-p=)
-using org-mode's =org-unfontify-region=:
+Remove all org-link properties:
 
 #+begin_src emacs-lisp
   (font-lock-remove-keywords nil org-link-minor-mode-keywords)
-  (org-remove-from-invisibility-spec '(org-link))
-  (goto-char (point-min))
-  (while (re-search-forward org-link-minor-mode-link-regexp nil t)
-    (with-silent-modifications
-      (org-unfontify-region (match-beginning 0) (match-end 0))
-      )
-    )
 #+end_src
-
-Note: if we wanted to have more link types, we'd have to use the union
-of the various regexps here.
 
 Restore existing font lock highlighting
 
