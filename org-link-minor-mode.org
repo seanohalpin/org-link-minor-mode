@@ -58,7 +58,7 @@ the [[elisp:Defining-Minor-Modes][=define-minor-mode=]] macro:
     "Toggle display of org-mode style bracket links in non-org-mode buffers."
     :lighter " org-link"
 
-    «body»
+    <<body>>
     )
 #+end_src
 
@@ -70,8 +70,9 @@ The =:lighter= keyword parameter defines what appears in the mode line.
 :END:
 
 We start the body by setting up the font lock keywords, using
-org-mode's =org-activate-bracket-links= to do the heavy lifting. We then
-branch depending on whether we're entering or exiting the mode:
+org-mode's =org-activate-bracket-links=, etc. to do the heavy
+lifting. We then branch depending on whether we're entering or exiting
+the mode:
 
 #+name: body
 #+begin_src emacs-lisp :noweb tangle
@@ -84,8 +85,8 @@ branch depending on whether we're entering or exiting the mode:
           ))
         )
     (if org-link-minor-mode
-        «enter-minor-mode»
-      «exit-minor-mode»
+        <<enter-minor-mode>>
+      <<exit-minor-mode>>
       )
     )
 #+end_src
@@ -106,7 +107,7 @@ point we've already entered the mode.
         (message "org-mode doesn't need org-link-minor-mode")
         (org-link-minor-mode -1)
         )
-    «enter-minor-mode-body»
+    <<enter-minor-mode-body>>
     )
 #+end_src
 
@@ -136,6 +137,10 @@ Enable =return= to follow link (and =tab= to next link, =backtab= to previous):
                    map)
                  )
 #+end_src
+
+Reusing =org-mouse-map= like this is a hack. This keymap is set as a
+text property of links in =org-activate-bracket-links=, etc. so it's
+simpler to co-opt it than to replace those functions.
 
 Enable =org-toggle-link-display= for this buffer only by
 making =org-descriptive-links= buffer local:
@@ -169,7 +174,7 @@ Again, we don't run this code if we're already in org-mode:
 #+name: exit-minor-mode
 #+begin_src emacs-lisp :noweb tangle
   (unless (derived-mode-p 'org-mode)
-    «exit-minor-mode-body»
+    <<exit-minor-mode-body>>
     )
 #+end_src
 
@@ -189,6 +194,9 @@ Restore existing font lock highlighting
 
 #+begin_src emacs-lisp
   (org-restart-font-lock)
+  (kill-local-variable 'org-descriptive-links)
+  (kill-local-variable 'org-mouse-map)
+  (kill-local-variable 'font-lock-unfontify-region-function)
 #+end_src
 
 * Provide
@@ -196,7 +204,8 @@ Restore existing font lock highlighting
 :ID:       317688ba-da16-4a42-9e4f-20b06a8d86cf
 :END:
 
-Finally, we add the =provide= feature clause.
+Finally, we add the =provide= feature clause so that we can
+later =(require org-link-minor-mode)=.
 
 #+name: provide
 #+begin_src emacs-lisp
@@ -209,11 +218,11 @@ Here is the complete source:
 
 #+name: source
 #+begin_src emacs-lisp :tangle org-link-minor-mode.el :noweb yes :padline no
-«header-comments»
+<<header-comments>>
 
-«requires»
+<<requires>>
 
-«define-minor-mode»
+<<define-minor-mode>>
 
-«provide»
+<<provide>>
 #+end_src
