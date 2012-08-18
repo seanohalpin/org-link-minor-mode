@@ -19,7 +19,7 @@ on them and displayed so you can see only the description if present.
 Note that =org-toggle-link-display= will also work when this mode is
 enabled.
 
-* Install
+* Using
 
 To use this minor mode, put the file =org-link-minor-mode.el= somewhere
 on your load path and use
@@ -31,6 +31,12 @@ or put the following:
 :  (require 'org-link-minor-mode)
 
 in your =.emacs= file.
+
+You can then use:
+
+: M-x org-link-minor-mode
+
+to turn it on in the current buffer.
 
 * Rebuild
 
