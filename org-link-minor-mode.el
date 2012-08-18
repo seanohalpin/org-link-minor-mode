@@ -38,6 +38,16 @@
               (org-link-minor-mode -1)
               )
           (font-lock-add-keywords nil org-link-minor-mode-keywords t)
+          (kill-local-variable 'org-mouse-map)
+          (org-set-local 'org-mouse-map
+                         (let ((map (make-sparse-keymap)))
+                           (define-key map [return] 'org-open-at-point)
+                           (define-key map [tab] 'org-next-link)
+                           (define-key map [backtab] 'org-previous-link)
+                           (define-key map [mouse-2] 'org-open-at-point)
+                           (define-key map [follow-link] 'mouse-face)
+                           map)
+                         )
           (org-set-local 'org-descriptive-links org-descriptive-links)
           (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
           (org-set-local 'font-lock-unfontify-region-function
