@@ -1,4 +1,3 @@
-#+TITLE: org-link-minor-mode
 #+AUTHOR: Sean O'Halpin
 #+DATE: 2012-08-18
 #+OPTIONS: toc:nil num:nil
@@ -11,10 +10,8 @@ org-mode.
 
 Org-mode bracket links look like this:
 
-#+begin_example
-   [[http://www.bbc.co.uk][BBC]]
-   [[org-link-minor-mode]]
-#+end_example
+:   [[http://www.bbc.co.uk][BBC]]
+:   [[org-link-minor-mode]]
 
 With this mode enabled, the links will be made active so you can click
 on them and displayed so you can see only the description if present.
@@ -31,9 +28,7 @@ on your load path and use
 
 or put the following:
 
-#+begin_src emacs-lisp
-  (require 'org-link-minor-mode)
-#+end_src
+:  (require 'org-link-minor-mode)
 
 in your =.emacs= file.
 
