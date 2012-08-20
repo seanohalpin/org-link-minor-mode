@@ -19,6 +19,7 @@
 
 (require 'org)
 
+;;;###autoload
 (define-minor-mode org-link-minor-mode
   "Toggle display of org-mode style bracket links in non-org-mode buffers."
   :lighter " org-link"
