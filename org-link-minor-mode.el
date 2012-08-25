@@ -31,10 +31,10 @@
                             '(mouse-face t keymap t org-linked-text t
                                          invisible t intangible t
                                          help-echo t rear-nonsticky t
-                                         fontified t
                                          org-no-flyspell t org-emphasis t))
     (org-remove-font-lock-display-properties beg end)))
 
+;;;###autoload
 (define-minor-mode org-link-minor-mode
   "Toggle display of org-mode style bracket links in non-org-mode buffers."
   :lighter " org-link"
