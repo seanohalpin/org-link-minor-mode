@@ -1,5 +1,7 @@
-#+TITLE: org-link-minor-mode
 #+SETUPFILE: ~/org/setup2.org
+#+TITLE: org-link-minor-mode
+#+AUTHOR: Sean O'Halpin
+#+DATE: 2012-08-25
 #+PROPERTY: eval never
 #+COMMENT: comments noweb
 #+LINK: elisp http://www.gnu.org/software/emacs/manual/html_node/elisp/%s.html
@@ -98,7 +100,7 @@ the mode:
 
 If we're already in org-mode, display a message and
 switch =org-link-minor-mode= off. We need to do it this way as by this
-point we've already entered the mode.
+point we've already entered the minor mode (=org-link-minor-mode= == t):
 
 #+name: enter-minor-mode
 #+begin_src emacs-lisp :noweb tangle
@@ -155,8 +157,12 @@ into it (or use replace to make it no longer a link):
 
 #+begin_src emacs-lisp
   (org-set-local 'font-lock-unfontify-region-function
-                 'org-unfontify-region)
+                 'org-link-minor-mode-unfontify-region)
 #+end_src
+
+The [[elisp:Search_002dbased-Fontification][documentation]] for [[elisp:Other-Font-Lock-Variables][=font-lock-unfontify-region-function=]] is a bit
+sparse but reading =org-unfontify-region= at least shows you what it
+should do.
 
 Finally, we refontify the buffer using org's own method:
 
@@ -194,9 +200,38 @@ Restore existing font lock highlighting
 
 #+begin_src emacs-lisp
   (org-restart-font-lock)
+  (remove-from-invisibility-spec '(org-link))
   (kill-local-variable 'org-descriptive-links)
   (kill-local-variable 'org-mouse-map)
   (kill-local-variable 'font-lock-unfontify-region-function)
+#+end_src
+
+* Remove text properties
+
+=org-unfontify-region= does not remove the =help-echo= and =rear-nonsticky=
+properties, so I've copied the function and added those in.
+
+Actually, this looks like a bug in =org-unfontify-region=.
+
+(Note: should I be removing the =fontified= property too? It doesn't
+look like other modes do this.)
+
+#+name: org-link-minor-mode-unfontify-region
+#+begin_src emacs-lisp
+  (defun org-link-minor-mode-unfontify-region (beg end &optional maybe_loudly)
+    "Remove fontification and activation overlays from links."
+    (font-lock-default-unfontify-region beg end)
+    (let* ((buffer-undo-list t)
+           (inhibit-read-only t) (inhibit-point-motion-hooks t)
+           (inhibit-modification-hooks t)
+           deactivate-mark buffer-file-name buffer-file-truename)
+      (org-decompose-region beg end)
+      (remove-text-properties beg end
+                              '(mouse-face t keymap t org-linked-text t
+                                           invisible t intangible t
+                                           help-echo t rear-nonsticky t
+                                           org-no-flyspell t org-emphasis t))
+      (org-remove-font-lock-display-properties beg end)))
 #+end_src
 
 * Provide
@@ -221,6 +256,8 @@ Here is the complete source:
 <<header-comments>>
 
 <<requires>>
+
+<<org-link-minor-mode-unfontify-region>>
 
 <<define-minor-mode>>
 
