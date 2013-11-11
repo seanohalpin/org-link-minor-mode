@@ -51,19 +51,22 @@ load =org-mode=:
 :ID:       2e643e2a-acb4-43dd-92b3-d8048f66f854
 :END:
 
-The simplest way to define a new minor mode is to use
-the [[elisp:Defining-Minor-Modes][=define-minor-mode=]] macro:
+The simplest way to define a new minor mode is to use the
+[[elisp:Defining-Minor-Modes][=define-minor-mode=]] macro:
 
 #+name: define-minor-mode
 #+begin_src emacs-lisp :noweb tangle
   ;;;###autoload
   (define-minor-mode org-link-minor-mode
-    "Toggle display of org-mode style bracket links in non-org-mode buffers."
+    "Toggle display of org-mode style links in non-org-mode buffers."
     :lighter " org-link"
 
     <<body>>
     )
 #+end_src
+
+The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Autoload.html][=autoload= magic comment]] is used by emacs at build time to add the
+=org-link-minor-mode= function to =loaddefs.el=.
 
 The =:lighter= keyword parameter defines what appears in the mode line.
 
