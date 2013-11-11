@@ -38,8 +38,8 @@
 :ID:       0e3b4960-cc9f-4ebe-9acf-c6632b3c68f2
 :END:
 
-As we rely on many =org-mode= functions, to avoid warnings, we
-load =org-mode=:
+As we rely on many =org-mode= functions, to avoid warnings, we load
+=org-mode=:
 
 #+name: requires
 #+begin_src emacs-lisp
@@ -102,9 +102,9 @@ the mode:
 :ID:       a1b76a00-4444-4b5c-bbfa-54c88dac769f
 :END:
 
-If we're already in org-mode, display a message and
-switch =org-link-minor-mode= off. We need to do it this way as by this
-point we've already entered the minor mode (=org-link-minor-mode= == t):
+If we're already in org-mode, display a message and switch
+=org-link-minor-mode= off. We need to do it this way as by this point
+we've already entered the minor mode (=org-link-minor-mode= == t):
 
 #+name: enter-minor-mode
 #+begin_src emacs-lisp :noweb tangle
@@ -148,8 +148,8 @@ Reusing =org-mouse-map= like this is a hack. This keymap is set as a
 text property of links in =org-activate-bracket-links=, etc. so it's
 simpler to co-opt it than to replace those functions.
 
-Enable =org-toggle-link-display= for this buffer only by
-making =org-descriptive-links= buffer local:
+Enable =org-toggle-link-display= for this buffer only by making
+=org-descriptive-links= buffer local:
 
 #+begin_src emacs-lisp
   (org-set-local 'org-descriptive-links org-descriptive-links)
@@ -243,8 +243,8 @@ look like other modes do this.)
 :ID:       317688ba-da16-4a42-9e4f-20b06a8d86cf
 :END:
 
-Finally, we add the =provide= feature clause so that we can
-later =(require org-link-minor-mode)=.
+Finally, we add the =provide= feature clause so that we can later
+=(require org-link-minor-mode)=.
 
 #+name: provide
 #+begin_src emacs-lisp
