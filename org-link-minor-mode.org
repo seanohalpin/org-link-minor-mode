@@ -13,10 +13,11 @@
 
 #+name: header-comments
 #+begin_src emacs-lisp
-;;; org-link-minor-mode.el -- Enable org-mode links in non-org modes
+;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes
 ;;
 ;; Copyright (C) 2012
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
+;; Package-Requires: ((org "7"))
 ;;
 ;; Enables org-mode links of the form:
 ;;
@@ -246,6 +247,7 @@ later =(require org-link-minor-mode)=.
 #+name: provide
 #+begin_src emacs-lisp
 (provide 'org-link-minor-mode)
+;;; org-link-minor-mode.el ends here
 #+end_src
 
 * Complete source
