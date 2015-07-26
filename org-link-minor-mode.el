@@ -34,11 +34,15 @@
                                          org-no-flyspell t org-emphasis t))
     (org-remove-font-lock-display-properties beg end)))
 
+(defvar org-link-minor-mode-map (make-sparse-keymap)
+  "Local keymap.")
+(make-variable-buffer-local 'org-link-minor-mode-map)
+
 ;;;###autoload
 (define-minor-mode org-link-minor-mode
   "Toggle display of org-mode style bracket links in non-org-mode buffers."
   :lighter " org-link"
-
+  :keymap org-link-minor-mode-map
   (let ((org-link-minor-mode-keywords
          (list
           '(org-activate-angle-links (0 'org-link t))
@@ -65,10 +69,12 @@
                            map)
                          )
           (org-set-local 'org-descriptive-links org-descriptive-links)
+          (setq org-descriptive-links t)
           (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
           (org-set-local 'font-lock-unfontify-region-function
                          'org-link-minor-mode-unfontify-region)
-          (org-restart-font-lock)
+          (org-toggle-link-display)
+          ;;(org-restart-font-lock) called in org-toggle-link-display
           )
       (unless (derived-mode-p 'org-mode)
         (font-lock-remove-keywords nil org-link-minor-mode-keywords)
