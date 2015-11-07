@@ -1,7 +1,8 @@
-;;; org-link-minor-mode.el -- Enable org-mode links in non-org modes
+;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes
 ;;
 ;; Copyright (C) 2012
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
+;; Package-Requires: ((org "7"))
 ;;
 ;; Enables org-mode links of the form:
 ;;
@@ -89,3 +90,4 @@
   )
 
 (provide 'org-link-minor-mode)
+;;; org-link-minor-mode.el ends here
