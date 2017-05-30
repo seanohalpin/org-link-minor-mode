@@ -8,6 +8,7 @@
 ;;
 ;;   http://www.bbc.co.uk
 ;;   man:emacs
+;;   info:emacs
 ;;   <http://www.bbc.co.uk>
 ;;   [[http://www.bbc.co.uk][BBC]]
 ;;   [[org-link-minor-mode]]
@@ -44,14 +45,18 @@
   "Toggle display of org-mode style bracket links in non-org-mode buffers."
   :lighter " org-link"
   :keymap org-link-minor-mode-map
-  (let ((org-link-minor-mode-keywords
-         (list
-          '(org-activate-angle-links (0 'org-link t))
-          '(org-activate-plain-links)
-          '(org-activate-bracket-links (0 'org-link t))
-          '(org-activate-dates (0 'org-date t))
-          ))
-        )
+  (let (org-link-minor-mode-keywords)
+    (if (fboundp 'org-activate-links)
+        ;; from Org v9.2
+        (setq org-link-minor-mode-keywords
+              (list
+               'org-activate-links
+               '(org-activate-dates (0 'org-date t))
+               ))
+      (setq org-link-minor-mode-keywords
+            '(org-activate-angle-links (0 'org-link t))
+            '(org-activate-plain-links)
+            '(org-activate-bracket-links (0 'org-link t))))
     (if org-link-minor-mode
         (if (derived-mode-p 'org-mode)
             (progn
@@ -69,11 +74,15 @@
                         (define-key map [follow-link] 'mouse-face)
                         map)
                       )
-          (setq-local org-descriptive-links org-descriptive-links)
-          (setq org-descriptive-links t)
-          (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
+
           (setq-local font-lock-unfontify-region-function
                       'org-link-minor-mode-unfontify-region)
+          (setq-local org-descriptive-links org-descriptive-links)
+
+          (condition-case nil (require 'org-man)
+            (error (message "Problems while trying to load feature `org-man'")))
+          ;; Set to non-descriptive and then switch to descriptive links
+          (setq org-descriptive-links nil)
           (org-toggle-link-display)
           ;;(org-restart-font-lock) called in org-toggle-link-display
           )
