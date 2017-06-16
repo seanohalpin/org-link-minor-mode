@@ -13,10 +13,11 @@
 
 #+name: header-comments
 #+begin_src emacs-lisp
-;;; org-link-minor-mode.el -- Enable org-mode links in non-org modes
+;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes
 ;;
 ;; Copyright (C) 2012
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
+;; Package-Requires: ((org "7"))
 ;;
 ;; Enables org-mode links of the form:
 ;;
@@ -133,15 +134,15 @@ Enable =return= to follow link (and =tab= to next link, =backtab= to previous):
 
 #+begin_src emacs-lisp
   (kill-local-variable 'org-mouse-map)
-  (org-set-local 'org-mouse-map
-                 (let ((map (make-sparse-keymap)))
-                   (define-key map [return] 'org-open-at-point)
-                   (define-key map [tab] 'org-next-link)
-                   (define-key map [backtab] 'org-previous-link)
-                   (define-key map [mouse-2] 'org-open-at-point)
-                   (define-key map [follow-link] 'mouse-face)
-                   map)
-                 )
+  (setq-local org-mouse-map
+              (let ((map (make-sparse-keymap)))
+                (define-key map [return] 'org-open-at-point)
+                (define-key map [tab] 'org-next-link)
+                (define-key map [backtab] 'org-previous-link)
+                (define-key map [mouse-2] 'org-open-at-point)
+                (define-key map [follow-link] 'mouse-face)
+                map)
+              )
 #+end_src
 
 Reusing =org-mouse-map= like this is a hack. This keymap is set as a
@@ -152,7 +153,7 @@ Enable =org-toggle-link-display= for this buffer only by making
 =org-descriptive-links= buffer local:
 
 #+begin_src emacs-lisp
-  (org-set-local 'org-descriptive-links org-descriptive-links)
+  (setq-local org-descriptive-links org-descriptive-links)
   (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
 #+end_src
 
@@ -160,8 +161,8 @@ This is the magic that makes the link body appear if you backspace
 into it (or use replace to make it no longer a link):
 
 #+begin_src emacs-lisp
-  (org-set-local 'font-lock-unfontify-region-function
-                 'org-link-minor-mode-unfontify-region)
+  (setq-local font-lock-unfontify-region-function
+              'org-link-minor-mode-unfontify-region)
 #+end_src
 
 The [[elisp:Search_002dbased-Fontification][documentation]] for [[elisp:Other-Font-Lock-Variables][=font-lock-unfontify-region-function=]] is a bit
@@ -249,6 +250,7 @@ Finally, we add the =provide= feature clause so that we can later
 #+name: provide
 #+begin_src emacs-lisp
 (provide 'org-link-minor-mode)
+;;; org-link-minor-mode.el ends here
 #+end_src
 
 * Complete source
