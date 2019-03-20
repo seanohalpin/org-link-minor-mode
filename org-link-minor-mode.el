@@ -122,8 +122,7 @@
         (remove-from-invisibility-spec '(org-link))
         (kill-local-variable 'org-descriptive-links)
         (kill-local-variable 'org-mouse-map)
-        (kill-local-variable 'font-lock-unfontify-region-function)
-        ))))
+        (kill-local-variable 'font-lock-unfontify-region-function)))))
 
 (provide 'org-link-minor-mode)
 ;;; org-link-minor-mode.el ends here
