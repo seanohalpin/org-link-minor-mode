@@ -15,14 +15,17 @@
 #+begin_src emacs-lisp
 ;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes
 ;;
-;; Copyright (C) 2012
+;; Copyright (C) 2012-2017
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
-;; Package-Requires: ((org "7"))
+;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
+;; Package-Requires: ((org "8"))
+;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;;
 ;; Enables org-mode links of the form:
 ;;
 ;;   http://www.bbc.co.uk
 ;;   man:emacs
+;;   info:emacs
 ;;   <http://www.bbc.co.uk>
 ;;   [[http://www.bbc.co.uk][BBC]]
 ;;   [[org-link-minor-mode]]
@@ -31,7 +34,19 @@
 ;;
 ;; Note that =org-toggle-link-display= will also work when this mode
 ;; is enabled.
-;;
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #+end_src
 
 * Require org-mode
@@ -47,6 +62,23 @@ As we rely on many =org-mode= functions, to avoid warnings, we load
 (require 'org)
 #+end_src
 
+* Declarations for byte-code compiler
+
+#+name: declarations-for-byte-code
+#+begin_src emacs-lisp
+;; Following declarations are necessary to make the byte compiler happy.
+
+;; For org v8 compatibility (if used with org v9)
+(declare-function org-activate-plain-links "org" (limit))
+(declare-function org-activate-angle-links "org" (limit))
+(declare-function org-activate-bracket-links "org" (limit))
+(declare-function org-decompose-region "org-compat" (beg end))
+
+;; For org v9 compatibility (if used with org v8)
+(declare-function org-activate-links "org" (limit))
+(declare-function org-activate-dates "org" (limit))
+#+end_src
+
 * Using the =define-minor-mode= macro
 :PROPERTIES:
 :ID:       2e643e2a-acb4-43dd-92b3-d8048f66f854
@@ -56,14 +88,13 @@ The simplest way to define a new minor mode is to use the
 [[elisp:Defining-Minor-Modes][=define-minor-mode=]] macro:
 
 #+name: define-minor-mode
-#+begin_src emacs-lisp :noweb tangle
-  ;;;###autoload
-  (define-minor-mode org-link-minor-mode
-    "Toggle display of org-mode style links in non-org-mode buffers."
-    :lighter " org-link"
-
-    <<body>>
-    )
+#+begin_src emacs-lisp
+;;;###autoload
+(define-minor-mode org-link-minor-mode
+  "Toggle display of org-mode style bracket links in non-org-mode buffers."
+  :lighter " org-link"
+  :keymap org-link-minor-mode-map
+  <<body>>)
 #+end_src
 
 The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Autoload.html][=autoload= magic comment]] is used by emacs at build time to add the
@@ -82,20 +113,30 @@ lifting. We then branch depending on whether we're entering or exiting
 the mode:
 
 #+name: body
-#+begin_src emacs-lisp :noweb tangle
-  (let ((org-link-minor-mode-keywords
-         (list
-          '(org-activate-angle-links (0 'org-link t))
-          '(org-activate-plain-links)
-          '(org-activate-bracket-links (0 'org-link t))
-          '(org-activate-dates (0 'org-date t))
-          ))
-        )
-    (if org-link-minor-mode
-        <<enter-minor-mode>>
-      <<exit-minor-mode>>
-      )
-    )
+#+begin_src emacs-lisp
+(let ((lk org-highlight-links)
+      org-link-minor-mode-keywords)
+  (if (fboundp 'org-activate-links)
+      ;; from Org v9.2
+      (setq org-link-minor-mode-keywords
+            (list
+             '(org-activate-links)
+             (when (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
+             (when (memq 'radio lk) '(org-activate-target-links (1 'org-link t)))
+             (when (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+             (when (memq 'footnote lk) '(org-activate-footnote-links))))
+    (setq org-link-minor-mode-keywords
+          (list
+           (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
+           (if (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
+           (if (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
+           (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
+           (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
+           (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+           (if (memq 'footnote lk) '(org-activate-footnote-links)))))
+  (if org-link-minor-mode
+      <<enter-minor-mode>>
+    <<exit-minor-mode>>))
 #+end_src
 
 * Entering the minor mode
@@ -108,14 +149,23 @@ If we're already in org-mode, display a message and switch
 we've already entered the minor mode (=org-link-minor-mode= == t):
 
 #+name: enter-minor-mode
-#+begin_src emacs-lisp :noweb tangle
-  (if (derived-mode-p 'org-mode)
-      (progn
-        (message "org-mode doesn't need org-link-minor-mode")
-        (org-link-minor-mode -1)
-        )
-    <<enter-minor-mode-body>>
-    )
+#+begin_src emacs-lisp
+(if (derived-mode-p 'org-mode)
+    (progn
+      (message "org-mode doesn't need org-link-minor-mode")
+      (org-link-minor-mode -1))
+  <<enter-minor-mode-body>>)
+#+end_src
+
+* Minor mode body
+
+#+name: enter-minor-mode-body
+#+begin_src emacs-lisp :exports both :results pp :lexical yes
+<<font-lock-spec>>
+<<define-key-map>>
+<<unfontify-region-function>>
+<<org-descriptive-links>>
+<<restart-font-lock>>
 #+end_src
 
 * Turning on org-link highlighting
@@ -126,23 +176,24 @@ we've already entered the minor mode (=org-link-minor-mode= == t):
 
 Add the font-lock specification:
 
+#+name: font-lock-spec
 #+begin_src emacs-lisp
   (font-lock-add-keywords nil org-link-minor-mode-keywords t)
 #+end_src
 
 Enable =return= to follow link (and =tab= to next link, =backtab= to previous):
 
+#+name: define-key-map
 #+begin_src emacs-lisp
-  (kill-local-variable 'org-mouse-map)
-  (setq-local org-mouse-map
-              (let ((map (make-sparse-keymap)))
-                (define-key map [return] 'org-open-at-point)
-                (define-key map [tab] 'org-next-link)
-                (define-key map [backtab] 'org-previous-link)
-                (define-key map [mouse-2] 'org-open-at-point)
-                (define-key map [follow-link] 'mouse-face)
-                map)
-              )
+(kill-local-variable 'org-mouse-map)
+(setq-local org-mouse-map
+            (let ((map (make-sparse-keymap)))
+              (define-key map [return] 'org-open-at-point)
+              (define-key map [tab] 'org-next-link)
+              (define-key map [backtab] 'org-previous-link)
+              (define-key map [mouse-2] 'org-open-at-point)
+              (define-key map [follow-link] 'mouse-face)
+              map))
 #+end_src
 
 Reusing =org-mouse-map= like this is a hack. This keymap is set as a
@@ -152,17 +203,28 @@ simpler to co-opt it than to replace those functions.
 Enable =org-toggle-link-display= for this buffer only by making
 =org-descriptive-links= buffer local:
 
+#+name: org-descriptive-links-orig
 #+begin_src emacs-lisp
-  (setq-local org-descriptive-links org-descriptive-links)
-  (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
+(setq-local org-descriptive-links org-descriptive-links)
+(if org-descriptive-links (add-to-invisibility-spec '(org-link)))
+#+end_src
+
+#+name: org-descriptive-links
+#+begin_src emacs-lisp
+(setq-local org-descriptive-links org-descriptive-links)
+(condition-case nil (require 'org-man)
+  (error (message "Problems while trying to load feature `org-man'")))
+;; Set to non-descriptive and then switch to descriptive links
+(setq org-descriptive-links nil)
 #+end_src
 
 This is the magic that makes the link body appear if you backspace
 into it (or use replace to make it no longer a link):
 
+#+name: unfontify-region-function
 #+begin_src emacs-lisp
-  (setq-local font-lock-unfontify-region-function
-              'org-link-minor-mode-unfontify-region)
+(setq-local font-lock-unfontify-region-function
+            'org-link-minor-mode-unfontify-region)
 #+end_src
 
 The [[elisp:Search_002dbased-Fontification][documentation]] for [[elisp:Other-Font-Lock-Variables][=font-lock-unfontify-region-function=]] is a bit
@@ -171,8 +233,14 @@ should do.
 
 Finally, we refontify the buffer using org's own method:
 
+#+name: restart-font-lock-orig
 #+begin_src emacs-lisp
-  (org-restart-font-lock)
+(org-restart-font-lock)
+#+end_src
+
+#+name: restart-font-lock
+#+begin_src emacs-lisp
+(org-toggle-link-display)
 #+end_src
 
 * Exiting the minor mode
@@ -183,10 +251,15 @@ Finally, we refontify the buffer using org's own method:
 Again, we don't run this code if we're already in org-mode:
 
 #+name: exit-minor-mode
-#+begin_src emacs-lisp :noweb tangle
-  (unless (derived-mode-p 'org-mode)
-    <<exit-minor-mode-body>>
-    )
+#+begin_src emacs-lisp
+(unless (derived-mode-p 'org-mode)
+  <<exit-minor-mode-body>>)
+#+end_src
+
+#+name: exit-minor-mode-body
+#+begin_src emacs-lisp
+<<remove-keywords>>
+<<kill-local-variables>>
 #+end_src
 
 * Exit minor mode body
@@ -197,18 +270,20 @@ Again, we don't run this code if we're already in org-mode:
 
 Remove all org-link properties:
 
+#+name: remove-keywords
 #+begin_src emacs-lisp
-  (font-lock-remove-keywords nil org-link-minor-mode-keywords)
+(font-lock-remove-keywords nil org-link-minor-mode-keywords)
 #+end_src
 
 Restore existing font lock highlighting
 
+#+name: kill-local-variables
 #+begin_src emacs-lisp
-  (org-restart-font-lock)
-  (remove-from-invisibility-spec '(org-link))
-  (kill-local-variable 'org-descriptive-links)
-  (kill-local-variable 'org-mouse-map)
-  (kill-local-variable 'font-lock-unfontify-region-function)
+(org-restart-font-lock)
+(remove-from-invisibility-spec '(org-link))
+(kill-local-variable 'org-descriptive-links)
+(kill-local-variable 'org-mouse-map)
+(kill-local-variable 'font-lock-unfontify-region-function)
 #+end_src
 
 * Remove text properties
@@ -223,20 +298,29 @@ look like other modes do this.)
 
 #+name: org-link-minor-mode-unfontify-region
 #+begin_src emacs-lisp
-  (defun org-link-minor-mode-unfontify-region (beg end &optional maybe_loudly)
-    "Remove fontification and activation overlays from links."
-    (font-lock-default-unfontify-region beg end)
-    (let* ((buffer-undo-list t)
-           (inhibit-read-only t) (inhibit-point-motion-hooks t)
-           (inhibit-modification-hooks t)
-           deactivate-mark buffer-file-name buffer-file-truename)
-      (org-decompose-region beg end)
-      (remove-text-properties beg end
-                              '(mouse-face t keymap t org-linked-text t
-                                           invisible t intangible t
-                                           help-echo t rear-nonsticky t
-                                           org-no-flyspell t org-emphasis t))
-      (org-remove-font-lock-display-properties beg end)))
+(defun org-link-minor-mode-unfontify-region (beg end &optional maybe_loudly)
+  "Remove fontification and activation overlays from links."
+  (font-lock-default-unfontify-region beg end)
+  (let* ((buffer-undo-list t)
+         (inhibit-read-only t) (inhibit-point-motion-hooks t)
+         (inhibit-modification-hooks t)
+         deactivate-mark buffer-file-name buffer-file-truename)
+    (if (fboundp 'org-decompose-region)
+        (org-decompose-region beg end)
+      (decompose-region beg end))
+    (remove-text-properties beg end
+                            '(mouse-face t keymap t org-linked-text t
+                                         invisible t intangible t
+                                         help-echo t rear-nonsticky t
+                                         org-no-flyspell t org-emphasis t))
+    (org-remove-font-lock-display-properties beg end)))
+#+end_src
+
+#+name: keymap
+#+begin_src emacs-lisp
+(defvar org-link-minor-mode-map (make-sparse-keymap)
+  "Local keymap.")
+(make-variable-buffer-local 'org-link-minor-mode-map)
 #+end_src
 
 * Provide
@@ -263,7 +347,11 @@ Here is the complete source:
 
 <<requires>>
 
+<<declarations-for-byte-code>>
+
 <<org-link-minor-mode-unfontify-region>>
+
+<<keymap>>
 
 <<define-minor-mode>>
 
