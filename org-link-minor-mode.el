@@ -3,7 +3,7 @@
 ;; Copyright (C) 2012-2020
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
 ;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
-;; Package-Requires: ((org "9"))
+;; Package-Requires: ((org "8"))
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;;
 ;; Enables org-mode links of the form:
@@ -35,6 +35,18 @@
 
 (require 'org)
 
+;; Following declarations are necessary to make the byte compiler happy.
+
+;; For org v8 compatibility (if used with org v9)
+(declare-function org-activate-plain-links "org" (limit))
+(declare-function org-activate-angle-links "org" (limit))
+(declare-function org-activate-bracket-links "org" (limit))
+(declare-function org-decompose-region "org-compat" (beg end))
+
+;; For org v9 compatibility (if used with org v8)
+(declare-function org-activate-links "org" (limit))
+(declare-function org-activate-dates "org" (limit))
+
 (defun org-link-minor-mode--unfontify-region (beg end)
   "Remove fontification and activation overlays from links."
   (font-lock-default-unfontify-region beg end)
@@ -42,7 +54,9 @@
          (inhibit-read-only t) (inhibit-point-motion-hooks t)
          (inhibit-modification-hooks t)
          deactivate-mark buffer-file-name buffer-file-truename)
-    (decompose-region beg end)
+    (if (fboundp 'org-decompose-region)
+        (org-decompose-region beg end)
+      (decompose-region beg end))
     (remove-text-properties beg end
                             '(mouse-face t keymap t org-linked-text t
                                          invisible t intangible t

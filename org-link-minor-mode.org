@@ -18,7 +18,7 @@
 ;; Copyright (C) 2012-2020
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
 ;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
-;; Package-Requires: ((org "9"))
+;; Package-Requires: ((org "8"))
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;;
 ;; Enables org-mode links of the form:
@@ -64,7 +64,7 @@ As we rely on many =org-mode= functions, to avoid warnings, we load
 
 * Declarations for byte-code compiler
 
-#+name: declarations-for-byte-code-x
+#+name: declarations-for-byte-code
 #+begin_src emacs-lisp
 ;; Following declarations are necessary to make the byte compiler happy.
 
@@ -110,6 +110,17 @@ The =:lighter= keyword parameter defines what appears in the mode line.
 We start the body by setting up the font lock keywords, using
 org-mode's own =org-activate= functions to do the heavy lifting. We then
 branch depending on whether we're entering or exiting the mode:
+
+org-highlight-links - default value is
+
+: (bracket angle plain radio tag date footnote)
+
+Help for this variable in the Customize buffer says:
+
+#+begin_quote
+If you set this variable during an Emacs session, use ‘org-mode-restart’
+in the Org buffer so that the change takes effect.
+#+end_quote
 
 #+name: body
 #+begin_src emacs-lisp
@@ -177,7 +188,7 @@ Add the font-lock specification:
 
 #+name: font-lock-spec
 #+begin_src emacs-lisp
-  (font-lock-add-keywords nil org-link-minor-mode-keywords t)
+(font-lock-add-keywords nil org-link-minor-mode-keywords t)
 #+end_src
 
 Enable =return= to follow link (and =tab= to next link, =backtab= to previous):
@@ -303,7 +314,9 @@ Text may still have the =fontified= property, but that belongs to
          (inhibit-read-only t) (inhibit-point-motion-hooks t)
          (inhibit-modification-hooks t)
          deactivate-mark buffer-file-name buffer-file-truename)
-    (decompose-region beg end)
+    (if (fboundp 'org-decompose-region)
+        (org-decompose-region beg end)
+      (decompose-region beg end))
     (remove-text-properties beg end
                             '(mouse-face t keymap t org-linked-text t
                                          invisible t intangible t
@@ -346,6 +359,8 @@ Here is the complete source:
 <<header-comments>>
 
 <<requires>>
+
+<<declarations-for-byte-code>>
 
 <<org-link-minor-mode--unfontify-region>>
 
