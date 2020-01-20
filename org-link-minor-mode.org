@@ -1,7 +1,7 @@
 #+SETUPFILE: ~/org/setup2.org
-#+TITLE: org-link-minor-mode
-#+AUTHOR: Sean O'Halpin
-#+DATE: 2012-08-25
+#+TITLE:org-link-minor-mode
+#+AUTHOR:Sean O'Halpin
+#+DATE:2012-08-25
 #+PROPERTY: eval never
 #+COMMENT: comments noweb
 #+LINK: elisp http://www.gnu.org/software/emacs/manual/html_node/elisp/%s.html
@@ -13,12 +13,12 @@
 
 #+name: header-comments
 #+begin_src emacs-lisp
-;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes
+;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2012-2017
+;; Copyright (C) 2012-2020
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
 ;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
-;; Package-Requires: ((org "8"))
+;; Package-Requires: ((org "9"))
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;;
 ;; Enables org-mode links of the form:
@@ -64,7 +64,7 @@ As we rely on many =org-mode= functions, to avoid warnings, we load
 
 * Declarations for byte-code compiler
 
-#+name: declarations-for-byte-code
+#+name: declarations-for-byte-code-x
 #+begin_src emacs-lisp
 ;; Following declarations are necessary to make the byte compiler happy.
 
@@ -108,9 +108,8 @@ The =:lighter= keyword parameter defines what appears in the mode line.
 :END:
 
 We start the body by setting up the font lock keywords, using
-org-mode's =org-activate-bracket-links=, etc. to do the heavy
-lifting. We then branch depending on whether we're entering or exiting
-the mode:
+org-mode's own =org-activate= functions to do the heavy lifting. We then
+branch depending on whether we're entering or exiting the mode:
 
 #+name: body
 #+begin_src emacs-lisp
@@ -212,8 +211,6 @@ Enable =org-toggle-link-display= for this buffer only by making
 #+name: org-descriptive-links
 #+begin_src emacs-lisp
 (setq-local org-descriptive-links org-descriptive-links)
-(condition-case nil (require 'org-man)
-  (error (message "Problems while trying to load feature `org-man'")))
 ;; Set to non-descriptive and then switch to descriptive links
 (setq org-descriptive-links nil)
 #+end_src
@@ -224,7 +221,7 @@ into it (or use replace to make it no longer a link):
 #+name: unfontify-region-function
 #+begin_src emacs-lisp
 (setq-local font-lock-unfontify-region-function
-            'org-link-minor-mode-unfontify-region)
+            'org-link-minor-mode--unfontify-region)
 #+end_src
 
 The [[elisp:Search_002dbased-Fontification][documentation]] for [[elisp:Other-Font-Lock-Variables][=font-lock-unfontify-region-function=]] is a bit
@@ -256,12 +253,6 @@ Again, we don't run this code if we're already in org-mode:
   <<exit-minor-mode-body>>)
 #+end_src
 
-#+name: exit-minor-mode-body
-#+begin_src emacs-lisp
-<<remove-keywords>>
-<<kill-local-variables>>
-#+end_src
-
 * Exit minor mode body
 :PROPERTIES:
 :noweb-ref: exit-minor-mode-body
@@ -286,35 +277,44 @@ Restore existing font lock highlighting
 (kill-local-variable 'font-lock-unfontify-region-function)
 #+end_src
 
+#+name: exit-minor-mode-body
+#+begin_src emacs-lisp :noweb no-export
+<<remove-keywords>>
+<<kill-local-variables>>
+#+end_src
+
 * Remove text properties
 
-=org-unfontify-region= does not remove the =help-echo= and =rear-nonsticky=
-properties, so I've copied the function and added those in.
+=org-unfontify-region= does not remove the =help-echo=, =htmlize-link= and
+=rear-nonsticky= properties, so I've copied that function and added
+those in.
 
-Actually, this looks like a bug in =org-unfontify-region=.
+This looks like a bug in =org-unfontify-region=.
 
-(Note: should I be removing the =fontified= property too? It doesn't
-look like other modes do this.)
+Text may still have the =fontified= property, but that belongs to
+=font-lock-mode= so is not for us to remove.
 
-#+name: org-link-minor-mode-unfontify-region
+#+name: org-link-minor-mode--unfontify-region
 #+begin_src emacs-lisp
-(defun org-link-minor-mode-unfontify-region (beg end &optional maybe_loudly)
+(defun org-link-minor-mode--unfontify-region (beg end)
   "Remove fontification and activation overlays from links."
   (font-lock-default-unfontify-region beg end)
   (let* ((buffer-undo-list t)
          (inhibit-read-only t) (inhibit-point-motion-hooks t)
          (inhibit-modification-hooks t)
          deactivate-mark buffer-file-name buffer-file-truename)
-    (if (fboundp 'org-decompose-region)
-        (org-decompose-region beg end)
-      (decompose-region beg end))
+    (decompose-region beg end)
     (remove-text-properties beg end
                             '(mouse-face t keymap t org-linked-text t
                                          invisible t intangible t
                                          help-echo t rear-nonsticky t
+                                         htmlize-link t
                                          org-no-flyspell t org-emphasis t))
     (org-remove-font-lock-display-properties beg end)))
 #+end_src
+
+The keymap is defined in case you want to define your own key bindings
+for this mode. It is not used by =org-link-minor-mode= itself.
 
 #+name: keymap
 #+begin_src emacs-lisp
@@ -329,7 +329,7 @@ look like other modes do this.)
 :END:
 
 Finally, we add the =provide= feature clause so that we can later
-=(require org-link-minor-mode)=.
+=(require 'org-link-minor-mode)=.
 
 #+name: provide
 #+begin_src emacs-lisp
@@ -347,9 +347,7 @@ Here is the complete source:
 
 <<requires>>
 
-<<declarations-for-byte-code>>
-
-<<org-link-minor-mode-unfontify-region>>
+<<org-link-minor-mode--unfontify-region>>
 
 <<keymap>>
 

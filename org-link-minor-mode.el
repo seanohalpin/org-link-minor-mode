@@ -1,9 +1,9 @@
-;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes
+;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2012-2017
+;; Copyright (C) 2012-2020
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
 ;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
-;; Package-Requires: ((org "8"))
+;; Package-Requires: ((org "9"))
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;;
 ;; Enables org-mode links of the form:
@@ -35,32 +35,19 @@
 
 (require 'org)
 
-;; Following declarations are necessary to make the byte compiler happy.
-
-;; For org v8 compatibility (if used with org v9)
-(declare-function org-activate-plain-links "org" (limit))
-(declare-function org-activate-angle-links "org" (limit))
-(declare-function org-activate-bracket-links "org" (limit))
-(declare-function org-decompose-region "org-compat" (beg end))
-
-;; For org v9 compatibility (if used with org v8)
-(declare-function org-activate-links "org" (limit))
-(declare-function org-activate-dates "org" (limit))
-
-(defun org-link-minor-mode-unfontify-region (beg end &optional maybe_loudly)
+(defun org-link-minor-mode--unfontify-region (beg end)
   "Remove fontification and activation overlays from links."
   (font-lock-default-unfontify-region beg end)
   (let* ((buffer-undo-list t)
          (inhibit-read-only t) (inhibit-point-motion-hooks t)
          (inhibit-modification-hooks t)
          deactivate-mark buffer-file-name buffer-file-truename)
-    (if (fboundp 'org-decompose-region)
-        (org-decompose-region beg end)
-      (decompose-region beg end))
+    (decompose-region beg end)
     (remove-text-properties beg end
                             '(mouse-face t keymap t org-linked-text t
                                          invisible t intangible t
                                          help-echo t rear-nonsticky t
+                                         htmlize-link t
                                          org-no-flyspell t org-emphasis t))
     (org-remove-font-lock-display-properties beg end)))
 
@@ -109,10 +96,8 @@
                         (define-key map [follow-link] 'mouse-face)
                         map))
           (setq-local font-lock-unfontify-region-function
-                      'org-link-minor-mode-unfontify-region)
+                      'org-link-minor-mode--unfontify-region)
           (setq-local org-descriptive-links org-descriptive-links)
-          (condition-case nil (require 'org-man)
-            (error (message "Problems while trying to load feature `org-man'")))
           ;; Set to non-descriptive and then switch to descriptive links
           (setq org-descriptive-links nil)
           (org-toggle-link-display))
