@@ -2,8 +2,7 @@
 #+TITLE:org-link-minor-mode
 #+AUTHOR:Sean O'Halpin
 #+DATE:2012-08-25
-#+PROPERTY: eval never
-#+COMMENT: comments noweb
+#+PROPERTY: header-args :eval never
 #+LINK: elisp http://www.gnu.org/software/emacs/manual/html_node/elisp/%s.html
 
 * Header
@@ -11,45 +10,95 @@
 :ID:       14f6023b-6e29-4266-82f2-d227902d4cf7
 :END:
 
-#+name: header-comments
+The header has the following structure:
+
+#+name: header
 #+begin_src emacs-lisp
-;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes -*- lexical-binding: t; -*-
+;;; <<title-line>>
 ;;
-;; Copyright (C) 2012-2020
-;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
-;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
-;; Package-Requires: ((org "8"))
-;; Url: https://github.com/seanohalpin/org-link-minor-mode
+;; <<copyright>>
 ;;
-;; Enables org-mode links of the form:
+;; <<package-info>>
 ;;
-;;   http://www.bbc.co.uk
-;;   man:emacs
-;;   info:emacs
-;;   <http://www.bbc.co.uk>
-;;   [[http://www.bbc.co.uk][BBC]]
-;;   [[org-link-minor-mode]]
-;;   [2012-08-18]
-;;   <2012-08-18>
+;; <<commentary>>
 ;;
-;; Note that =org-toggle-link-display= will also work when this mode
-;; is enabled.
-
-;; This file is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This file is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; <<gnu-std-header>>
 #+end_src
 
-* Require org-mode
+** Title line
+
+The title line is the first line in the file and shows the name of the
+file and a short description. It also specifies lexical-binding.
+
+#+name: title-line
+#+begin_src text
+org-link-minor-mode.el --- Enable org-mode links in non-org modes -*- lexical-binding: t; -*-
+#+end_src
+
+** Copyright
+
+#+name: copyright
+#+begin_src text
+Copyright (C) 2012-2020
+Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
+Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
+#+end_src
+
+** Package info
+
+Specify that this package requires at least Org 8 and the repo url:
+
+#+name: package-info
+#+begin_src text
+Package-Requires: ((org "8"))
+Url: https://github.com/seanohalpin/org-link-minor-mode
+#+end_src
+
+** Commentary
+
+A brief explanation of the package:
+
+#+name: commentary
+#+begin_src text
+Enables org-mode links of the form:
+
+  http://www.bbc.co.uk
+  man:emacs
+  info:emacs
+  <http://www.bbc.co.uk>
+  [[http://www.bbc.co.uk][BBC]]
+  [[org-link-minor-mode]]
+  [2012-08-18]
+  <2012-08-18>
+
+Note that `org-toggle-link-display' will also work when this mode
+is enabled.
+#+end_src
+
+** GNU GPL 3 comment
+
+All files submitted to ELPA should contain the standard GNU GPL 3
+comment:
+
+#+name: gnu-std-header
+#+begin_src text
+This file is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3, or (at your option)
+any later version.
+
+This file is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#+end_src
+
+* Code
+
+** Require org-mode
 :PROPERTIES:
 :ID:       0e3b4960-cc9f-4ebe-9acf-c6632b3c68f2
 :END:
@@ -62,7 +111,7 @@ As we rely on many =org-mode= functions, to avoid warnings, we load
 (require 'org)
 #+end_src
 
-* Declarations for byte-code compiler
+** Declarations for byte-code compiler
 
 #+name: declarations-for-byte-code
 #+begin_src emacs-lisp
@@ -79,7 +128,7 @@ As we rely on many =org-mode= functions, to avoid warnings, we load
 (declare-function org-activate-dates "org" (limit))
 #+end_src
 
-* Using the =define-minor-mode= macro
+** Using the =define-minor-mode= macro
 :PROPERTIES:
 :ID:       2e643e2a-acb4-43dd-92b3-d8048f66f854
 :END:
@@ -102,16 +151,30 @@ The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Autoload.html][=a
 
 The =:lighter= keyword parameter defines what appears in the mode line.
 
-* The body
+** The body
 :PROPERTIES:
 :ID:       4e5b0abe-bc41-43f6-9271-b6365a7b5bce
 :END:
 
-We start the body by setting up the font lock keywords, using
-org-mode's own =org-activate= functions to do the heavy lifting. We then
-branch depending on whether we're entering or exiting the mode:
+#+name: body
+#+begin_src emacs-lisp
+(let ((lk org-highlight-links)
+      org-link-minor-mode-keywords)
+  <<set-up-font-lock-keywords>>
+  <<enter-exit-mode>>)
+#+end_src
+# NB: Indent is hack to fix indentation in tangled output file
 
-org-highlight-links - default value is
+We start the body by setting up the font lock keywords in the variable
+=org-link-minor-mode-keywords=, using org-mode's own =org-activate-xxx=
+functions to do the heavy lifting.
+
+Note: we do this /before/ entering the mode so the definition of
+=org-link-minor-mode-keywords= is available for when we want to leave
+the mode.
+
+#+begin_comment
+The default value for =org-highlight-links= is:
 
 : (bracket angle plain radio tag date footnote)
 
@@ -121,42 +184,48 @@ Help for this variable in the Customize buffer says:
 If you set this variable during an Emacs session, use ‘org-mode-restart’
 in the Org buffer so that the change takes effect.
 #+end_quote
+#+end_comment
 
-#+name: body
+#+name: set-up-font-lock-keywords
 #+begin_src emacs-lisp
-(let ((lk org-highlight-links)
-      org-link-minor-mode-keywords)
-  (if (fboundp 'org-activate-links)
-      ;; from Org v9.2
-      (setq org-link-minor-mode-keywords
-            (list
-             '(org-activate-links)
-             (when (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
-             (when (memq 'radio lk) '(org-activate-target-links (1 'org-link t)))
-             (when (memq 'date lk) '(org-activate-dates (0 'org-date t)))
-             (when (memq 'footnote lk) '(org-activate-footnote-links))))
+(if (fboundp 'org-activate-links)
+    ;; from Org v9.2
     (setq org-link-minor-mode-keywords
           (list
-           (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
-           (if (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
-           (if (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
-           (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
-           (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
-           (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
-           (if (memq 'footnote lk) '(org-activate-footnote-links)))))
-  (if org-link-minor-mode
-      <<enter-minor-mode>>
-    <<exit-minor-mode>>))
+           '(org-activate-links)
+           (when (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
+           (when (memq 'radio lk) '(org-activate-target-links (1 'org-link t)))
+           (when (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+           (when (memq 'footnote lk) '(org-activate-footnote-links))))
+  (setq org-link-minor-mode-keywords
+        (list
+         (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
+         (if (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
+         (if (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
+         (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
+         (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
+         (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+         (if (memq 'footnote lk) '(org-activate-footnote-links)))))
 #+end_src
 
-* Entering the minor mode
+We then branch depending on whether we're entering or exiting the
+mode:
+
+#+name: enter-exit-mode
+#+begin_src emacs-lisp
+(if org-link-minor-mode
+    <<enter-minor-mode>>
+  <<exit-minor-mode>>)
+#+end_src
+
+** Entering the minor mode
 :PROPERTIES:
 :ID:       a1b76a00-4444-4b5c-bbfa-54c88dac769f
 :END:
 
 If we're already in org-mode, display a message and switch
 =org-link-minor-mode= off. We need to do it this way as by this point
-we've already entered the minor mode (=org-link-minor-mode= == t):
+we've already entered the minor mode (=org-link-minor-mode= is =t=):
 
 #+name: enter-minor-mode
 #+begin_src emacs-lisp
@@ -167,18 +236,25 @@ we've already entered the minor mode (=org-link-minor-mode= == t):
   <<enter-minor-mode-body>>)
 #+end_src
 
-* Minor mode body
+** Minor mode body
+
+When we enter the minor mode, we
+1. add the font lock keywords
+2. define the keymap that will be active within links
+3. set the unfontify function
+4. set up =org-descriptive-links=
+5. turn on link display
 
 #+name: enter-minor-mode-body
 #+begin_src emacs-lisp :exports both :results pp :lexical yes
 <<font-lock-spec>>
-<<define-key-map>>
+<<define-keymap>>
 <<unfontify-region-function>>
 <<org-descriptive-links>>
-<<restart-font-lock>>
+<<turn-on-link-display>>
 #+end_src
 
-* Turning on org-link highlighting
+** Turning on org-link highlighting
 :PROPERTIES:
 :noweb-ref: enter-minor-mode-body
 :ID:       8d3990a4-ee3b-4276-9a6b-53665c095133
@@ -191,9 +267,13 @@ Add the font-lock specification:
 (font-lock-add-keywords nil org-link-minor-mode-keywords t)
 #+end_src
 
-Enable =return= to follow link (and =tab= to next link, =backtab= to previous):
+Org mode associates the =org-mouse-map= keymap with links. This becomes
+active when the mouse or point is over a link.
 
-#+name: define-key-map
+We can use this to enable =return= to follow link (and =tab= to next link,
+=backtab= to previous, etc.):
+
+#+name: define-keymap
 #+begin_src emacs-lisp
 (kill-local-variable 'org-mouse-map)
 (setq-local org-mouse-map
@@ -241,17 +321,17 @@ should do.
 
 Finally, we refontify the buffer using org's own method:
 
-#+name: restart-font-lock-orig
+#+name: turn-on-link-display-orig
 #+begin_src emacs-lisp
 (org-restart-font-lock)
 #+end_src
 
-#+name: restart-font-lock
+#+name: turn-on-link-display
 #+begin_src emacs-lisp
 (org-toggle-link-display)
 #+end_src
 
-* Exiting the minor mode
+** Exiting the minor mode
 :PROPERTIES:
 :ID:       95c5162b-ec40-4bb7-849c-f10d12185b29
 :END:
@@ -264,13 +344,7 @@ Again, we don't run this code if we're already in org-mode:
   <<exit-minor-mode-body>>)
 #+end_src
 
-* Exit minor mode body
-:PROPERTIES:
-:noweb-ref: exit-minor-mode-body
-:ID:       a555c274-844a-4913-91e0-6be72a1911e1
-:END:
-
-Remove all org-link properties:
+Remove all org-link font-lock properties:
 
 #+name: remove-keywords
 #+begin_src emacs-lisp
@@ -294,16 +368,16 @@ Restore existing font lock highlighting
 <<kill-local-variables>>
 #+end_src
 
-* Remove text properties
+*** Remove text properties
 
 =org-unfontify-region= does not remove the =help-echo=, =htmlize-link= and
 =rear-nonsticky= properties, so I've copied that function and added
 those in.
 
-This looks like a bug in =org-unfontify-region=.
+Note: This looks like a bug in =org-unfontify-region=.
 
-Text may still have the =fontified= property, but that belongs to
-=font-lock-mode= so is not for us to remove.
+We can ignore the =fontified= property as that belongs to
+=font-lock-mode=.
 
 #+name: org-link-minor-mode--unfontify-region
 #+begin_src emacs-lisp
@@ -336,7 +410,7 @@ for this mode. It is not used by =org-link-minor-mode= itself.
 (make-variable-buffer-local 'org-link-minor-mode-map)
 #+end_src
 
-* Provide
+** Provide
 :PROPERTIES:
 :ID:       317688ba-da16-4a42-9e4f-20b06a8d86cf
 :END:
@@ -356,7 +430,7 @@ Here is the complete source:
 
 #+name: source
 #+begin_src emacs-lisp :tangle org-link-minor-mode.el :noweb yes :padline no
-<<header-comments>>
+<<header>>
 
 <<requires>>
 

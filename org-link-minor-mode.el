@@ -3,11 +3,12 @@
 ;; Copyright (C) 2012-2020
 ;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
 ;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
+;;
 ;; Package-Requires: ((org "8"))
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;;
 ;; Enables org-mode links of the form:
-;;
+;; 
 ;;   http://www.bbc.co.uk
 ;;   man:emacs
 ;;   info:emacs
@@ -16,20 +17,20 @@
 ;;   [[org-link-minor-mode]]
 ;;   [2012-08-18]
 ;;   <2012-08-18>
-;;
-;; Note that =org-toggle-link-display= will also work when this mode
+;; 
+;; Note that `org-toggle-link-display' will also work when this mode
 ;; is enabled.
-
+;;
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 3, or (at your option)
 ;; any later version.
-
+;; 
 ;; This file is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-
+;; 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
