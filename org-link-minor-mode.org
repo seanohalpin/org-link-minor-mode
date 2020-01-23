@@ -1,9 +1,27 @@
-#+SETUPFILE: ~/org/setup2.org
+:header:
+#+OPTIONS: ^:{} <:nil todo:nil tags:nil num:nil H:4 toc:2
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://dl.dropbox.com/u/909897/css/soh-org-min.css">
+#+MACRO: arg   @@html:<var class="arg">$1</var>@@
+#+MACRO: code  @@html:<code>$1</code>@@
+#+MACRO: const @@html:<var class="const">$1</var>@@
+#+MACRO: file  @@html:<var class="filename">$1</var>@@
+#+MACRO: fn    @@html:<code class="function">$1</code>@@
+#+MACRO: kbd   @@html:<kbd>$1</kbd>@@
+#+MACRO: key   @@html:<kbd>$1</kbd>@@
+#+MACRO: kw    @@html:<var class="keyword">$1</var>@@
+#+MACRO: macro @@html:<var class="macro">$1</var>@@
+#+MACRO: mode  @@html:<var class="mode">$1</var>@@
+#+MACRO: param @@html:<var class="param">$1</var>@@
+#+MACRO: prop  @@html:<var class="property">$1</var>@@
+#+MACRO: tt    @@html:<tt>$1</tt>@@
+#+MACRO: var   @@html:<var>$1</var>@@
+#+PROPERTY: header-args :eval never :noweb no-export
+#+LINK: elisp http://www.gnu.org/software/emacs/manual/html_node/elisp/%s.html
+:end:
 #+TITLE:org-link-minor-mode
 #+AUTHOR:Sean O'Halpin
 #+DATE:2012-08-25
-#+PROPERTY: header-args :eval never
-#+LINK: elisp http://www.gnu.org/software/emacs/manual/html_node/elisp/%s.html
+#+DATE:2020-01-23
 
 * Header
 :PROPERTIES:
@@ -28,7 +46,8 @@ The header has the following structure:
 ** Title line
 
 The title line is the first line in the file and shows the name of the
-file and a short description. It also specifies lexical-binding.
+file and a short description. It also turns on
+{{{var(lexical-binding)}}}.
 
 #+name: title-line
 #+begin_src text
@@ -103,8 +122,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 :ID:       0e3b4960-cc9f-4ebe-9acf-c6632b3c68f2
 :END:
 
-As we rely on many =org-mode= functions, to avoid warnings, we load
-=org-mode=:
+As we rely on many {{{mode(org-mode)}}} functions, to avoid warnings, we
+load {{{mode(org-mode)}}}:
 
 #+name: requires
 #+begin_src emacs-lisp
@@ -128,13 +147,13 @@ As we rely on many =org-mode= functions, to avoid warnings, we load
 (declare-function org-activate-dates "org" (limit))
 #+end_src
 
-** Using the =define-minor-mode= macro
+** Using the {{{macro(define-minor-mode)}}} macro
 :PROPERTIES:
 :ID:       2e643e2a-acb4-43dd-92b3-d8048f66f854
 :END:
 
 The simplest way to define a new minor mode is to use the
-[[elisp:Defining-Minor-Modes][=define-minor-mode=]] macro:
+[[elisp:Defining-Minor-Modes][{{{fn(define-minor-mode)}}}]] macro:
 
 #+name: define-minor-mode
 #+begin_src emacs-lisp
@@ -146,10 +165,10 @@ The simplest way to define a new minor mode is to use the
   <<body>>)
 #+end_src
 
-The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Autoload.html][=autoload= magic comment]] is used by emacs at build time to add the
-=org-link-minor-mode= function to =loaddefs.el=.
+The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Autoload.html][{{{kw(autoload)}}} magic comment]] is used by emacs at build time to add the
+{{{fn(org-link-minor-mode)}}} function to {{{file(loaddefs.el)}}}.
 
-The =:lighter= keyword parameter defines what appears in the mode line.
+The {{{kw(:lighter)}}} keyword parameter defines what appears in the mode line.
 
 ** The body
 :PROPERTIES:
@@ -166,15 +185,15 @@ The =:lighter= keyword parameter defines what appears in the mode line.
 # NB: Indent is hack to fix indentation in tangled output file
 
 We start the body by setting up the font lock keywords in the variable
-=org-link-minor-mode-keywords=, using org-mode's own =org-activate-xxx=
+{{{var(org-link-minor-mode-keywords)}}}, using org-mode's own {{{fn(org-activate-xxx)}}}
 functions to do the heavy lifting.
 
 Note: we do this /before/ entering the mode so the definition of
-=org-link-minor-mode-keywords= is available for when we want to leave
-the mode.
+{{{var(org-link-minor-mode-keywords)}}} is available for when we want
+to leave the mode.
 
 #+begin_comment
-The default value for =org-highlight-links= is:
+The default value for {{{var(org-highlight-links)}}} is:
 
 : (bracket angle plain radio tag date footnote)
 
@@ -223,9 +242,10 @@ mode:
 :ID:       a1b76a00-4444-4b5c-bbfa-54c88dac769f
 :END:
 
-If we're already in org-mode, display a message and switch
-=org-link-minor-mode= off. We need to do it this way as by this point
-we've already entered the minor mode (=org-link-minor-mode= is =t=):
+If we're already in {{{mode(org-mode)}}}, display a message and switch
+{{{mode(org-link-minor-mode)}}} off. We need to do it this way as by this point
+we've already entered the minor mode ({{{mode(org-link-minor-mode)}}}
+is {{{const(t))}}}:
 
 #+name: enter-minor-mode
 #+begin_src emacs-lisp
@@ -242,7 +262,7 @@ When we enter the minor mode, we
 1. add the font lock keywords
 2. define the keymap that will be active within links
 3. set the unfontify function
-4. set up =org-descriptive-links=
+4. set up {{{var(org-descriptive-links)}}}
 5. turn on link display
 
 #+name: enter-minor-mode-body
@@ -267,11 +287,11 @@ Add the font-lock specification:
 (font-lock-add-keywords nil org-link-minor-mode-keywords t)
 #+end_src
 
-Org mode associates the =org-mouse-map= keymap with links. This becomes
-active when the mouse or point is over a link.
+Org mode associates the {{{var(org-mouse-map)}}} keymap with
+links. This becomes active when the mouse or point is over a link.
 
-We can use this to enable =return= to follow link (and =tab= to next link,
-=backtab= to previous, etc.):
+We can use this to enable {{{key(return)}}} to follow link (and
+{{{key(tab)}}} to next link, {{{key(backtab)}}} to previous, etc.):
 
 #+name: define-keymap
 #+begin_src emacs-lisp
@@ -286,12 +306,12 @@ We can use this to enable =return= to follow link (and =tab= to next link,
               map))
 #+end_src
 
-Reusing =org-mouse-map= like this is a hack. This keymap is set as a
-text property of links in =org-activate-bracket-links=, etc. so it's
-simpler to co-opt it than to replace those functions.
+Reusing {{{var(org-mouse-map)}}} like this is a hack. This keymap is
+set as a text property of links in {{{fn(org-activate-links)}}},
+etc. so it's simpler to co-opt it than to replace those functions.
 
-Enable =org-toggle-link-display= for this buffer only by making
-=org-descriptive-links= buffer local:
+Enable {{{fn(org-toggle-link-display)}}} for this buffer only by
+making {{{var(org-descriptive-links)}}} buffer local:
 
 #+name: org-descriptive-links-orig
 #+begin_src emacs-lisp
@@ -315,8 +335,8 @@ into it (or use replace to make it no longer a link):
             'org-link-minor-mode--unfontify-region)
 #+end_src
 
-The [[elisp:Search_002dbased-Fontification][documentation]] for [[elisp:Other-Font-Lock-Variables][=font-lock-unfontify-region-function=]] is a bit
-sparse but reading =org-unfontify-region= at least shows you what it
+The [[elisp:Search_002dbased-Fontification][documentation]] for [[elisp:Other-Font-Lock-Variables][{{{fn(font-lock-unfontify-region-function)}}}]] is a bit
+sparse but reading {{{fn(org-unfontify-region)}}} at least shows you what it
 should do.
 
 Finally, we refontify the buffer using org's own method:
@@ -370,14 +390,14 @@ Restore existing font lock highlighting
 
 *** Remove text properties
 
-=org-unfontify-region= does not remove the =help-echo=, =htmlize-link= and
-=rear-nonsticky= properties, so I've copied that function and added
-those in.
+{{{fn(org-unfontify-region)}}} does not remove the {{{prop(help-echo)}}},
+{{{prop(htmlize-link)}}} and {{{prop(rear-nonsticky)}}} properties, so I've copied
+that function and added those in.
 
-Note: This looks like a bug in =org-unfontify-region=.
+Note: This looks like a bug in {{{fn(org-unfontify-region)}}}.
 
-We can ignore the =fontified= property as that belongs to
-=font-lock-mode=.
+We can ignore the {{{prop(fontified)}}} property as that belongs to
+{{{mode(font-lock-mode)}}}.
 
 #+name: org-link-minor-mode--unfontify-region
 #+begin_src emacs-lisp
@@ -401,7 +421,7 @@ We can ignore the =fontified= property as that belongs to
 #+end_src
 
 The keymap is defined in case you want to define your own key bindings
-for this mode. It is not used by =org-link-minor-mode= itself.
+for this mode. It is not used by {{{mode(org-link-minor-mode)}}} itself.
 
 #+name: keymap
 #+begin_src emacs-lisp
@@ -415,8 +435,8 @@ for this mode. It is not used by =org-link-minor-mode= itself.
 :ID:       317688ba-da16-4a42-9e4f-20b06a8d86cf
 :END:
 
-Finally, we add the =provide= feature clause so that we can later
-=(require 'org-link-minor-mode)=.
+Finally, we add the {{{fn(provide)}}} feature clause so that we can later
+{{{code((require 'org-link-minor-mode))}}}.
 
 #+name: provide
 #+begin_src emacs-lisp
