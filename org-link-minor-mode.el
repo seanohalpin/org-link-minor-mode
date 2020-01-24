@@ -1,11 +1,33 @@
 ;;; org-link-minor-mode.el --- Enable org-mode links in non-org modes -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2012-2020
-;; Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
+;;
+;; Author: Sean O'Halpin <sean.ohalpin@gmail.com>
+;; Maintainer: Sean O'Halpin <sean.ohalpin@gmail.com>
+;; Created: 20120825
+;; Modified: 20200124
+;; Version: 0.0.3
+;; Package-Requires: ((org "8"))
+;; Package-Version: 20200124.1201
+;; Keywords: hypertext
+;; Url: https://github.com/seanohalpin/org-link-minor-mode
+;; 
 ;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
 ;;
-;; Package-Requires: ((org "8"))
-;; Url: https://github.com/seanohalpin/org-link-minor-mode
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+;; 
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;;
+;;; Commentary:
 ;;
 ;; Enables org-mode links of the form:
 ;; 
@@ -21,18 +43,7 @@
 ;; Note that `org-toggle-link-display' will also work when this mode
 ;; is enabled.
 ;;
-;; This file is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;; 
-;; This file is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-;; 
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;;; Code:
 
 (require 'org)
 
@@ -72,7 +83,7 @@
 
 ;;;###autoload
 (define-minor-mode org-link-minor-mode
-  "Toggle display of org-mode style bracket links in non-org-mode buffers."
+  "Toggle display of org-mode style links in non-org-mode buffers."
   :lighter " org-link"
   :keymap org-link-minor-mode-map
   (let ((lk org-highlight-links)
@@ -88,13 +99,13 @@
                (when (memq 'footnote lk) '(org-activate-footnote-links))))
       (setq org-link-minor-mode-keywords
             (list
-             (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
-             (if (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
-             (if (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
-             (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
-             (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
-             (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
-             (if (memq 'footnote lk) '(org-activate-footnote-links)))))
+             (when (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
+             (when (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
+             (when (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
+             (when (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
+             (when (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
+             (when (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+             (when (memq 'footnote lk) '(org-activate-footnote-links)))))
     (if org-link-minor-mode
         (if (derived-mode-p 'org-mode)
             (progn

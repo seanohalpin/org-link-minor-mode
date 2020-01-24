@@ -6,14 +6,12 @@
 #+MACRO: const @@html:<var class="const">$1</var>@@
 #+MACRO: file  @@html:<var class="filename">$1</var>@@
 #+MACRO: fn    @@html:<code class="function">$1</code>@@
-#+MACRO: kbd   @@html:<kbd>$1</kbd>@@
 #+MACRO: key   @@html:<kbd>$1</kbd>@@
 #+MACRO: kw    @@html:<var class="keyword">$1</var>@@
 #+MACRO: macro @@html:<var class="macro">$1</var>@@
 #+MACRO: mode  @@html:<var class="mode">$1</var>@@
 #+MACRO: param @@html:<var class="param">$1</var>@@
 #+MACRO: prop  @@html:<var class="property">$1</var>@@
-#+MACRO: tt    @@html:<tt>$1</tt>@@
 #+MACRO: var   @@html:<var>$1</var>@@
 #+PROPERTY: header-args :eval never :noweb no-export
 #+LINK: elisp http://www.gnu.org/software/emacs/manual/html_node/elisp/%s.html
@@ -21,7 +19,7 @@
 #+TITLE:org-link-minor-mode
 #+AUTHOR:Sean O'Halpin
 #+DATE:2012-08-25
-#+DATE:2020-01-23
+#+DATE:2020-01-24
 
 * Header
 :PROPERTIES:
@@ -38,9 +36,13 @@ The header has the following structure:
 ;;
 ;; <<package-info>>
 ;;
+;; <<gnu-std-header>>
+;;
+;;; Commentary:
+;;
 ;; <<commentary>>
 ;;
-;; <<gnu-std-header>>
+;;; Code:
 #+end_src
 
 ** Title line
@@ -50,27 +52,83 @@ file and a short description. It also turns on
 {{{var(lexical-binding)}}}.
 
 #+name: title-line
-#+begin_src text
+#+begin_src org
 org-link-minor-mode.el --- Enable org-mode links in non-org modes -*- lexical-binding: t; -*-
 #+end_src
 
-** Copyright
+** Metadata
+*** Copyright
 
 #+name: copyright
-#+begin_src text
+#+begin_src org
 Copyright (C) 2012-2020
-Author: Sean O'Halpin <sean dot ohalpin at gmail dot com>
+#+end_src
+
+*** Email
+
+#+name: email
+#+begin_src org
+Sean O'Halpin <sean.ohalpin@gmail.com>
+#+end_src
+
+*** Dates
+
+**** Created
+#+name: created
+#+begin_src org
+20120825
+#+end_src
+
+**** Modified
+#+name: modified
+#+begin_src emacs-lisp :eval yes
+(format-time-string "%Y%m%d")
+#+end_src
+
+**** Package-Version
+#+name: package-version
+#+begin_src emacs-lisp :eval yes
+(format-time-string "%Y%m%d.%H%M")
+#+end_src
+
+*** Package info
+
+Specify the package metadata and that it requires at least Org 8:
+
+#+name: package-info
+#+begin_src org
+Author: <<email>>
+Maintainer: <<email>>
+Created: <<created>>
+Modified: <<modified()>>
+Version: 0.0.3
+Package-Requires: ((org "8"))
+Package-Version: <<package-version()>>
+Keywords: hypertext
+Url: https://github.com/seanohalpin/org-link-minor-mode
+
 Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
 #+end_src
 
-** Package info
+** GNU GPL 3 comment
 
-Specify that this package requires at least Org 8 and the repo url:
+All files submitted to ELPA should contain the standard GNU GPL 3
+comment:
 
-#+name: package-info
-#+begin_src text
-Package-Requires: ((org "8"))
-Url: https://github.com/seanohalpin/org-link-minor-mode
+#+name: gnu-std-header
+#+begin_src org
+This file is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3, or (at your option)
+any later version.
+
+This file is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #+end_src
 
 ** Commentary
@@ -78,7 +136,7 @@ Url: https://github.com/seanohalpin/org-link-minor-mode
 A brief explanation of the package:
 
 #+name: commentary
-#+begin_src text
+#+begin_src org
 Enables org-mode links of the form:
 
   http://www.bbc.co.uk
@@ -92,27 +150,6 @@ Enables org-mode links of the form:
 
 Note that `org-toggle-link-display' will also work when this mode
 is enabled.
-#+end_src
-
-** GNU GPL 3 comment
-
-All files submitted to ELPA should contain the standard GNU GPL 3
-comment:
-
-#+name: gnu-std-header
-#+begin_src text
-This file is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3, or (at your option)
-any later version.
-
-This file is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #+end_src
 
 * Code
@@ -159,7 +196,7 @@ The simplest way to define a new minor mode is to use the
 #+begin_src emacs-lisp
 ;;;###autoload
 (define-minor-mode org-link-minor-mode
-  "Toggle display of org-mode style bracket links in non-org-mode buffers."
+  "Toggle display of org-mode style links in non-org-mode buffers."
   :lighter " org-link"
   :keymap org-link-minor-mode-map
   <<body>>)
@@ -218,13 +255,13 @@ in the Org buffer so that the change takes effect.
            (when (memq 'footnote lk) '(org-activate-footnote-links))))
   (setq org-link-minor-mode-keywords
         (list
-         (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
-         (if (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
-         (if (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
-         (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
-         (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
-         (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
-         (if (memq 'footnote lk) '(org-activate-footnote-links)))))
+         (when (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
+         (when (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
+         (when (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
+         (when (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
+         (when (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
+         (when (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+         (when (memq 'footnote lk) '(org-activate-footnote-links)))))
 #+end_src
 
 We then branch depending on whether we're entering or exiting the
@@ -342,7 +379,7 @@ should do.
 Finally, we refontify the buffer using org's own method:
 
 #+name: turn-on-link-display-orig
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :exports none :tangle no
 (org-restart-font-lock)
 #+end_src
 
@@ -441,7 +478,6 @@ Finally, we add the {{{fn(provide)}}} feature clause so that we can later
 #+name: provide
 #+begin_src emacs-lisp
 (provide 'org-link-minor-mode)
-;;; org-link-minor-mode.el ends here
 #+end_src
 
 * Complete source
@@ -449,7 +485,7 @@ Finally, we add the {{{fn(provide)}}} feature clause so that we can later
 Here is the complete source:
 
 #+name: source
-#+begin_src emacs-lisp :tangle org-link-minor-mode.el :noweb yes :padline no
+#+begin_src emacs-lisp :tangle org-link-minor-mode.el :tangle-mode (identity #o444) :noweb yes :padline no
 <<header>>
 
 <<requires>>
@@ -463,4 +499,5 @@ Here is the complete source:
 <<define-minor-mode>>
 
 <<provide>>
+;;; org-link-minor-mode.el ends here
 #+end_src
