@@ -8,7 +8,7 @@
 ;; Modified: 20200124
 ;; Version: 0.0.3
 ;; Package-Requires: ((org "8"))
-;; Package-Version: 20200124.1201
+;; Package-Version: 20200124.1318
 ;; Keywords: hypertext
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;; 
@@ -123,9 +123,7 @@
                         map))
           (setq-local font-lock-unfontify-region-function
                       'org-link-minor-mode--unfontify-region)
-          (setq-local org-descriptive-links org-descriptive-links)
-          ;; Set to non-descriptive and then switch to descriptive links
-          (setq org-descriptive-links nil)
+          (setq-local org-descriptive-links nil)
           (org-toggle-link-display))
       (unless (derived-mode-p 'org-mode)
         (font-lock-remove-keywords nil org-link-minor-mode-keywords)

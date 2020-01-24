@@ -303,7 +303,7 @@ When we enter the minor mode, we
 5. turn on link display
 
 #+name: enter-minor-mode-body
-#+begin_src emacs-lisp :exports both :results pp :lexical yes
+#+begin_src emacs-lisp :exports none
 <<font-lock-spec>>
 <<define-keymap>>
 <<unfontify-region-function>>
@@ -356,16 +356,16 @@ making {{{var(org-descriptive-links)}}} buffer local:
 (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
 #+end_src
 
+Make {{{var(org-descriptive-links)}}} local, set it to non-descriptive and
+then switch to descriptive links using {{{fn(org-toggle-link-display)}}}
+(below).
 #+name: org-descriptive-links
 #+begin_src emacs-lisp
-(setq-local org-descriptive-links org-descriptive-links)
-;; Set to non-descriptive and then switch to descriptive links
-(setq org-descriptive-links nil)
+(setq-local org-descriptive-links nil)
 #+end_src
 
 This is the magic that makes the link body appear if you backspace
 into it (or use replace to make it no longer a link):
-
 #+name: unfontify-region-function
 #+begin_src emacs-lisp
 (setq-local font-lock-unfontify-region-function
@@ -376,7 +376,9 @@ The [[elisp:Search_002dbased-Fontification][documentation]] for [[elisp:Other-Fo
 sparse but reading {{{fn(org-unfontify-region)}}} at least shows you what it
 should do.
 
-Finally, we refontify the buffer using org's own method:
+Finally, we refontify the buffer using
+{{{fn(org-toggle-link-display)}}}. This will reset
+{{{var(org-descriptive-links)}}} to {{{const(t)}}}.
 
 #+name: turn-on-link-display-orig
 #+begin_src emacs-lisp :exports none :tangle no
