@@ -410,12 +410,18 @@ Remove all org-link font-lock properties:
 (font-lock-remove-keywords nil org-link-minor-mode-keywords)
 #+end_src
 
-Restore existing font lock highlighting
+Restore existing font lock highlighting:
 
-#+name: kill-local-variables
+#+name: turn-off-link-display
 #+begin_src emacs-lisp
 (setq org-descriptive-links t)
 (org-toggle-link-display)
+#+end_src
+
+Kill the local variables:
+
+#+name: kill-local-variables
+#+begin_src emacs-lisp
 (kill-local-variable 'org-descriptive-links)
 (kill-local-variable 'org-mouse-map)
 (kill-local-variable 'font-lock-unfontify-region-function)
@@ -424,6 +430,7 @@ Restore existing font lock highlighting
 #+name: exit-minor-mode-body
 #+begin_src emacs-lisp :noweb no-export
 <<remove-keywords>>
+<<turn-off-link-display>>
 <<kill-local-variables>>
 #+end_src
 
