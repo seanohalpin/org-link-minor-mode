@@ -1,6 +1,10 @@
 :header:
 #+OPTIONS: ^:{} <:nil todo:nil tags:nil num:nil H:4 toc:2
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://dl.dropbox.com/u/909897/css/soh-org-min.css">
+#+HTML_HEAD: <style>var { font-family: monospace; font-style: normal; }</style>
+#+HTML_HEAD: <style>var.variable { font-style: italic; }</style>
+#+HTML_HEAD: <style>var.keyword { font-weight: bold; }</style>
+#+HTML_HEAD: <style>var.mode { font-weight: bold; }</style>
 #+MACRO: arg   @@html:<var class="arg">$1</var>@@
 #+MACRO: code  @@html:<code>$1</code>@@
 #+MACRO: const @@html:<var class="const">$1</var>@@
@@ -12,7 +16,7 @@
 #+MACRO: mode  @@html:<var class="mode">$1</var>@@
 #+MACRO: param @@html:<var class="param">$1</var>@@
 #+MACRO: prop  @@html:<var class="property">$1</var>@@
-#+MACRO: var   @@html:<var>$1</var>@@
+#+MACRO: var   @@html:<var class="variable">$1</var>@@
 #+PROPERTY: header-args :eval never :noweb no-export
 #+LINK: elisp http://www.gnu.org/software/emacs/manual/html_node/elisp/%s.html
 :end:
@@ -343,22 +347,13 @@ We can use this to enable {{{key(return)}}} to follow link (and
               map))
 #+end_src
 
-Reusing {{{var(org-mouse-map)}}} like this is a hack. This keymap is
-set as a text property of links in {{{fn(org-activate-links)}}},
-etc. so it's simpler to co-opt it than to replace those functions.
+Reusing {{{var(org-mouse-map)}}} like this is a hack.  This keymap is set as
+a text property of links in {{{fn(org-activate-links)}}}, etc. so it's
+simpler to co-opt it than to replace those functions.
 
-Enable {{{fn(org-toggle-link-display)}}} for this buffer only by
-making {{{var(org-descriptive-links)}}} buffer local:
+Make {{{var(org-descriptive-links)}}} local, turning it off.  We will switch
+descriptive links on when we call {{{fn(org-toggle-link-display)}}} below.
 
-#+name: org-descriptive-links-orig
-#+begin_src emacs-lisp
-(setq-local org-descriptive-links org-descriptive-links)
-(if org-descriptive-links (add-to-invisibility-spec '(org-link)))
-#+end_src
-
-Make {{{var(org-descriptive-links)}}} local, set it to non-descriptive and
-then switch to descriptive links using {{{fn(org-toggle-link-display)}}}
-(below).
 #+name: org-descriptive-links
 #+begin_src emacs-lisp
 (setq-local org-descriptive-links nil)
@@ -410,7 +405,7 @@ Remove all org-link font-lock properties:
 (font-lock-remove-keywords nil org-link-minor-mode-keywords)
 #+end_src
 
-Restore existing font lock highlighting:
+Turn off link display:
 
 #+name: turn-off-link-display
 #+begin_src emacs-lisp
@@ -428,7 +423,7 @@ Kill the local variables:
 #+end_src
 
 #+name: exit-minor-mode-body
-#+begin_src emacs-lisp :noweb no-export
+#+begin_src emacs-lisp :noweb no-export :exports none
 <<remove-keywords>>
 <<turn-off-link-display>>
 <<kill-local-variables>>

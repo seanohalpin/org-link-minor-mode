@@ -8,7 +8,7 @@
 ;; Modified: 20200124
 ;; Version: 0.0.3
 ;; Package-Requires: ((org "8"))
-;; Package-Version: 20200124.1325
+;; Package-Version: 20200124.1333
 ;; Keywords: hypertext
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;; 
