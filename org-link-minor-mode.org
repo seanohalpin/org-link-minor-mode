@@ -414,8 +414,8 @@ Restore existing font lock highlighting
 
 #+name: kill-local-variables
 #+begin_src emacs-lisp
-(org-restart-font-lock)
-(remove-from-invisibility-spec '(org-link))
+(setq org-descriptive-links t)
+(org-toggle-link-display)
 (kill-local-variable 'org-descriptive-links)
 (kill-local-variable 'org-mouse-map)
 (kill-local-variable 'font-lock-unfontify-region-function)

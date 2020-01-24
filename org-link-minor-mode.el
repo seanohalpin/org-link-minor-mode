@@ -8,7 +8,7 @@
 ;; Modified: 20200124
 ;; Version: 0.0.3
 ;; Package-Requires: ((org "8"))
-;; Package-Version: 20200124.1318
+;; Package-Version: 20200124.1321
 ;; Keywords: hypertext
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;; 
@@ -127,8 +127,8 @@
           (org-toggle-link-display))
       (unless (derived-mode-p 'org-mode)
         (font-lock-remove-keywords nil org-link-minor-mode-keywords)
-        (org-restart-font-lock)
-        (remove-from-invisibility-spec '(org-link))
+        (setq org-descriptive-links t)
+        (org-toggle-link-display)
         (kill-local-variable 'org-descriptive-links)
         (kill-local-variable 'org-mouse-map)
         (kill-local-variable 'font-lock-unfontify-region-function)))))
