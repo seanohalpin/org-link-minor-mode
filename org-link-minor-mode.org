@@ -171,12 +171,13 @@ is enabled.
 :ID:       0e3b4960-cc9f-4ebe-9acf-c6632b3c68f2
 :END:
 
-As we rely on many {{{mode(org-mode)}}} functions, to avoid warnings, we
-load {{{mode(org-mode)}}}:
+We require =org-element= to avoid the error
+
+: Error during redisplay: (jit-lock-function 1) signaled (void-variable org-element-paragraph-separate)
 
 #+name: requires
 #+begin_src emacs-lisp
-(require 'org)
+(require 'org-element)
 #+end_src
 
 ** Declarations for byte-code compiler

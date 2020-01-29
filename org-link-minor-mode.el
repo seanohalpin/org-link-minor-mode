@@ -8,7 +8,7 @@
 ;; Modified: 20200129
 ;; Version: 0.0.3
 ;; Package-Requires: ((emacs "24.3"))
-;; Package-Version: 20200129.0128
+;; Package-Version: 20200129.0141
 ;; Keywords: hypermedia
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;; 
@@ -45,7 +45,7 @@
 ;;
 ;;; Code:
 
-(require 'org)
+(require 'org-element)
 
 ;; Following declarations are necessary to make the byte compiler happy.
 
