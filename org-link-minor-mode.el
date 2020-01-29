@@ -8,7 +8,7 @@
 ;; Modified: 20200129
 ;; Version: 0.0.3
 ;; Package-Requires: ((emacs "24.3") (org "8"))
-;; Package-Version: 20200129.0015
+;; Package-Version: 20200129.0024
 ;; Keywords: hypermedia
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;; 
@@ -60,7 +60,7 @@
 (declare-function org-activate-dates "org" (limit))
 
 (defun org-link-minor-mode--unfontify-region (beg end)
-  "Remove fontification and activation overlays from links."
+  "Remove org-link fontification between BEG and END."
   (font-lock-default-unfontify-region beg end)
   (let* ((buffer-undo-list t)
          (inhibit-read-only t) (inhibit-point-motion-hooks t)

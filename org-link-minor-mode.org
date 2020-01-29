@@ -444,7 +444,7 @@ We can ignore the {{{prop(fontified)}}} property as that belongs to
 #+name: org-link-minor-mode--unfontify-region
 #+begin_src emacs-lisp
 (defun org-link-minor-mode--unfontify-region (beg end)
-  "Remove fontification and activation overlays from links."
+  "Remove org-link fontification between BEG and END."
   (font-lock-default-unfontify-region beg end)
   (let* ((buffer-undo-list t)
          (inhibit-read-only t) (inhibit-point-motion-hooks t)
