@@ -7,8 +7,8 @@
 ;; Created: 20120825
 ;; Modified: 20200129
 ;; Version: 0.0.3
-;; Package-Requires: ((emacs "24.3") (org "8"))
-;; Package-Version: 20200129.0024
+;; Package-Requires: ((emacs "24.3"))
+;; Package-Version: 20200129.0128
 ;; Keywords: hypermedia
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;; 

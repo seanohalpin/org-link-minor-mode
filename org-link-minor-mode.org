@@ -1,6 +1,5 @@
 :header:
 #+OPTIONS: ^:{} <:nil todo:nil tags:nil num:nil H:4 toc:2
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://dl.dropbox.com/u/909897/css/soh-org-min.css">
 #+HTML_HEAD: <style>var { font-family: monospace; font-style: normal; }</style>
 #+HTML_HEAD: <style>var.variable { font-style: italic; }</style>
 #+HTML_HEAD: <style>var.keyword { font-weight: bold; }</style>
@@ -28,6 +27,7 @@
 * Header
 :PROPERTIES:
 :ID:       14f6023b-6e29-4266-82f2-d227902d4cf7
+:header-args: :eval no-export
 :END:
 
 The header has the following structure:
@@ -89,6 +89,13 @@ Sean O'Halpin <sean.ohalpin@gmail.com>
 (format-time-string "%Y%m%d")
 #+end_src
 
+**** Version
+
+#+name: version
+#+begin_src org
+0.0.3
+#+end_src
+
 **** Package-Version
 #+name: package-version
 #+begin_src emacs-lisp :eval yes
@@ -106,8 +113,8 @@ Author: <<email>>
 Maintainer: <<email>>
 Created: <<created>>
 Modified: <<modified()>>
-Version: 0.0.3
-Package-Requires: ((emacs "24.3") (org "8"))
+Version: <<version>>
+Package-Requires: ((emacs "24.3"))
 Package-Version: <<package-version()>>
 Keywords: hypermedia
 Url: https://github.com/seanohalpin/org-link-minor-mode
@@ -460,6 +467,14 @@ We can ignore the {{{prop(fontified)}}} property as that belongs to
                                          htmlize-link t
                                          org-no-flyspell t org-emphasis t))
     (org-remove-font-lock-display-properties beg end)))
+#+end_src
+
+Note that =org-link-minor-mode-unfontify-region= is obsolete.
+
+#+begin_src emacs-lisp
+(defalias 'org-link-minor-mode-unfontify-region 'org-link-minor-mode--unfontify-region)
+(make-obsolete 'org-link-minor-mode-unfontify-region 'org-link-minor-mode--unfontify-region
+               "org-link-minor-mode 0.0.3")
 #+end_src
 
 The keymap is defined in case you want to define your own key bindings
