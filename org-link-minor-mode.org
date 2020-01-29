@@ -97,7 +97,8 @@ Sean O'Halpin <sean.ohalpin@gmail.com>
 
 *** Package info
 
-Specify the package metadata and that it requires at least Org 8:
+Specify the package metadata and that it requires at least Org 8 and
+Emacs 24.3 (for =lexical-binding= and =setq-local=):
 
 #+name: package-info
 #+begin_src org
@@ -106,9 +107,9 @@ Maintainer: <<email>>
 Created: <<created>>
 Modified: <<modified()>>
 Version: 0.0.3
-Package-Requires: ((org "8"))
+Package-Requires: ((emacs "24.3") (org "8"))
 Package-Version: <<package-version()>>
-Keywords: hypertext
+Keywords: hypermedia
 Url: https://github.com/seanohalpin/org-link-minor-mode
 
 Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>

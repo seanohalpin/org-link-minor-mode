@@ -5,11 +5,11 @@
 ;; Author: Sean O'Halpin <sean.ohalpin@gmail.com>
 ;; Maintainer: Sean O'Halpin <sean.ohalpin@gmail.com>
 ;; Created: 20120825
-;; Modified: 20200124
+;; Modified: 20200129
 ;; Version: 0.0.3
-;; Package-Requires: ((org "8"))
-;; Package-Version: 20200124.1333
-;; Keywords: hypertext
+;; Package-Requires: ((emacs "24.3") (org "8"))
+;; Package-Version: 20200129.0015
+;; Keywords: hypermedia
 ;; Url: https://github.com/seanohalpin/org-link-minor-mode
 ;; 
 ;; Changes for org v9: Stefan-W. Hahn <stefan dot hahn at s-hahn dot de>
